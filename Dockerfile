@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-suggests \
   python3 \
   && rm -rf /var/lib/apt/lists/*
 
+# Work around peer-dep conflict: @langchain/community → dotenv@^16 vs dotenv@17
+RUN npm config set legacy-peer-deps true
+
 # Only add basic files without the application itself to avoid rebuilding
 # layers when files (package.json etc.) have not changed
 COPY ./.config .config/
