@@ -1,0 +1,8 @@
+# Auto detect text files and ensure LF line endings
+* text=auto eol=lf
+
+# Force LF for files critical to Docker/Linux environments
+.devcontainer/** text eol=lf
+Dockerfile* text eol=lf
+docker-compose*.yml text eol=lf
+*.sh text eol=lf
