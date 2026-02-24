@@ -1,6 +1,5 @@
 import { PortfolioService } from '@ghostfolio/api/app/portfolio/portfolio.service';
 import { BenchmarkService } from '@ghostfolio/api/services/benchmark/benchmark.service';
-import { ConfigurationService } from '@ghostfolio/api/services/configuration/configuration.service';
 import { DataProviderService } from '@ghostfolio/api/services/data-provider/data-provider.service';
 import { PrismaService } from '@ghostfolio/api/services/prisma/prisma.service';
 import type { UserWithSettings } from '@ghostfolio/common/types';
@@ -42,7 +41,6 @@ export class AgentService {
 
   public constructor(
     private readonly benchmarkService: BenchmarkService,
-    private readonly configurationService: ConfigurationService,
     private readonly dataProviderService: DataProviderService,
     private readonly portfolioService: PortfolioService,
     private readonly prismaService: PrismaService
@@ -101,10 +99,7 @@ export class AgentService {
         error instanceof Error ? error.message : 'Unknown error';
 
       // Check for LLM provider errors
-      if (
-        errorMessage.includes('429') ||
-        errorMessage.includes('rate limit')
-      ) {
+      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
         throw new LlmUnavailableError(
           'The AI service is currently rate-limited. Please wait a moment and try again.'
         );
