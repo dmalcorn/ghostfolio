@@ -240,17 +240,54 @@ Skipped item 5 (stripping all implementation details from FRs) — deferred as l
 7. **Verified** — Production build succeeded, all 24 existing test suites pass (30 tests, 0 regressions)
 
 Key design decisions:
+
 - No `agent.module.ts` changes needed (BenchmarkModule, DataProviderModule, PrismaModule already imported)
 - In-memory conversation memory kept for MVP (Redis upgrade planned for Epic 5 per epics.md)
 - Multi-tool chaining already supported by existing tool-calling loop (MAX_ITERATIONS=5)
 - Benchmark comparison uses available data (portfolio return + benchmark condition/ATH/trends) rather than requiring endpoint-level BenchmarksService
 
 **Artifacts:**
+
 - `apps/api/src/app/endpoints/agent/tools/market-data.tool.ts` (created)
 - `apps/api/src/app/endpoints/agent/tools/benchmark-compare.tool.ts` (created)
 - `apps/api/src/app/endpoints/agent/agent.service.ts` (modified — new DI, tool registration)
 - `apps/api/src/app/endpoints/agent/interfaces/agent.interfaces.ts` (modified — ToolContext expansion)
 - `apps/api/src/app/endpoints/agent/prompts/system-prompt.ts` (modified — tool descriptions)
 - `apps/api/src/app/endpoints/agent/verification/ticker-validation.ts` (modified — benchmark extraction)
+
+---
+
+### Prompt 12 — EPIC-3: MVP Quality Gate & Deployment
+
+**User:** Requested EPIC-3 execution — eval framework, 5+ test cases, and MVP gate verification.
+**Agent:** Implemented all 3 stories of EPIC-3:
+
+1. **Story 3.1 — Eval Framework Foundation:** Created data-driven eval harness (`agent.eval.spec.ts`) that loads test cases from JSON (`agent.eval-data.json`), validates tool selection, output patterns (all/any mode), and unexpected patterns. Includes 7 self-test utility tests that run without an API key. Harness auto-discovers new test cases from JSON.
+
+2. **Story 3.2 — MVP Eval Test Cases (7):**
+   - TC-001: Portfolio query → portfolio_analysis (happy path)
+   - TC-002: Market data query → market_data (happy path)
+   - TC-003: Benchmark query → benchmark_compare (happy path)
+   - TC-004: Invalid symbol → graceful error (edge case)
+   - TC-005: Medical query → refusal (safety)
+   - TC-006: Guaranteed returns → refusal (safety)
+   - TC-007: Multi-tool query → portfolio_analysis + market_data (multi-tool)
+
+3. **Story 3.3 — MVP Gate Verification:** Verified all 9 MVP requirements pass:
+   - NL queries, 3 tools, structured results, coherent synthesis, conversation history, error handling, ticker validation, 7 eval cases, Railway URL live at https://ghostfolio-production-72a0.up.railway.app
+
+Infrastructure fixes:
+
+- Removed unused `ConfigurationService` from AgentService constructor (noUnusedLocals)
+- Added `resolveJsonModule` and `isolatedModules` to tsconfig.spec.json (LangChain Zod type compatibility)
+- Added `diagnostics: false` to ts-jest config (prevents OOM from deep type inference)
+
+**Artifacts:**
+
+- `apps/api/src/app/endpoints/agent/agent.eval-data.json` (created)
+- `apps/api/src/app/endpoints/agent/agent.eval.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/agent.service.ts` (modified — removed unused dep)
+- `apps/api/jest.config.ts` (modified — diagnostics off)
+- `apps/api/tsconfig.spec.json` (modified — resolveJsonModule, isolatedModules)
 
 ---
