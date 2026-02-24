@@ -37,7 +37,8 @@
       "Bash(grep -h \"name:\" /workspace/apps/api/src/app/endpoints/agent/tools/*.tool.ts)",
       "Bash(git add apps/api/src/app/endpoints/agent/agent.eval-data.json apps/api/src/app/endpoints/agent/agent.eval.spec.ts apps/api/src/app/endpoints/agent/agent.service.ts apps/api/jest.config.ts apps/api/tsconfig.spec.json)",
       "Bash(npx prettier --write gauntlet_docs/dev-prompts/dev-prompts-2026-02-24.md)",
-      "Bash(git add .claude/settings.json gauntlet_docs/dev-prompts/dev-prompts-2026-02-24.md)"
+      "Bash(git add .claude/settings.json gauntlet_docs/dev-prompts/dev-prompts-2026-02-24.md)",
+      "Bash(git rm --cached .env.dev)"
     ]
   }
 }
