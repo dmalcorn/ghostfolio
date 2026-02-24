@@ -8,28 +8,28 @@ Ghostfolio is an open-source wealth management software for tracking stocks, ETF
 
 ## Common Commands
 
-| Task | Command |
-|------|---------|
-| Install deps | `npm install` |
-| Start API (hot reload) | `npm run start:server` |
-| Start client | `npm run start:client` |
-| Run all tests | `npm test` |
-| Test API only | `npm run test:api` |
-| Test UI lib only | `npm run test:ui` |
-| Test common lib | `npm run test:common` |
-| Run single test file | `npm run test:single -- <path>` |
-| Lint all projects | `npm run lint` |
-| Format check | `npm run format:check` |
-| Format fix | `npm run format:write` |
-| Production build | `npm run build:production` |
-| DB push schema | `npm run database:push` |
-| DB setup (push + seed) | `npm run database:setup` |
-| DB migration | `npm run prisma migrate dev --name <name>` |
-| DB GUI (Prisma Studio) | `npm run database:gui` |
-| Generate Prisma types | `npm run database:generate-typings` |
-| Storybook | `npm run start:storybook` |
-| Extract i18n locales | `npm run extract-locales` |
-| **Local CI (full)** | `scripts/ci-local.sh` |
+| Task                   | Command                                    |
+| ---------------------- | ------------------------------------------ |
+| Install deps           | `npm install`                              |
+| Start API (hot reload) | `npm run start:server`                     |
+| Start client           | `npm run start:client`                     |
+| Run all tests          | `npm test`                                 |
+| Test API only          | `npm run test:api`                         |
+| Test UI lib only       | `npm run test:ui`                          |
+| Test common lib        | `npm run test:common`                      |
+| Run single test file   | `npm run test:single -- <path>`            |
+| Lint all projects      | `npm run lint`                             |
+| Format check           | `npm run format:check`                     |
+| Format fix             | `npm run format:write`                     |
+| Production build       | `npm run build:production`                 |
+| DB push schema         | `npm run database:push`                    |
+| DB setup (push + seed) | `npm run database:setup`                   |
+| DB migration           | `npm run prisma migrate dev --name <name>` |
+| DB GUI (Prisma Studio) | `npm run database:gui`                     |
+| Generate Prisma types  | `npm run database:generate-typings`        |
+| Storybook              | `npm run start:storybook`                  |
+| Extract i18n locales   | `npm run extract-locales`                  |
+| **Local CI (full)**    | `scripts/ci-local.sh`                      |
 
 The `test:single` script runs via `nx run api:test --test-file <filename>`. Tests require environment variables loaded from `.env.example` (the `npm test` script does this automatically via `dotenv-cli`).
 
@@ -48,6 +48,7 @@ scripts/            # CI and utility scripts
 ```
 
 **Path aliases** (defined in `tsconfig.base.json`):
+
 - `@ghostfolio/api/*` → `apps/api/src/*`
 - `@ghostfolio/client/*` → `apps/client/src/app/*`
 - `@ghostfolio/common/*` → `libs/common/src/lib/*`
@@ -60,6 +61,7 @@ scripts/            # CI and utility scripts
 NestJS application with URI-based versioning (`/api/v1/...`), CORS enabled, global validation pipes (`ValidationPipe` with whitelist + transform), and 10MB body limit for activity imports.
 
 **Module layout** (`apps/api/src/app/`):
+
 - **Domain modules**: `access/`, `account/`, `admin/`, `auth/`, `order/`, `portfolio/`, `symbol/`, `user/`, `subscription/`, etc. Each follows the pattern: `{feature}.module.ts`, `{feature}.controller.ts`, `{feature}.service.ts`
 - **Endpoints** (`endpoints/`): Standalone route handlers for `ai/`, `api-keys/`, `assets/`, `benchmarks/`, `data-providers/`, `market-data/`, `platforms/`, `public/`, `tags/`, `watchlist/`
 - **Services** (`apps/api/src/services/`): Cross-cutting concerns — `configuration/`, `cron/`, `data-provider/`, `exchange-rate-data/`, `market-data/`, `prisma/`, `queues/` (Bull queues for data-gathering and portfolio-snapshot), `property/`, `tag/`
@@ -69,6 +71,7 @@ NestJS application with URI-based versioning (`/api/v1/...`), CORS enabled, glob
 Angular 21 standalone component architecture with lazy-loaded routes. Routes are defined centrally in `@ghostfolio/common/routes/routes` and split into `publicRoutes` and `internalRoutes` (protected by `AuthGuard`).
 
 **Key directories**:
+
 - `pages/`: Feature pages, each with its own `{page}-page.routes.ts` for lazy loading
 - `components/`: Shared app-level components (header, footer, dialogs)
 - `core/`: `auth.guard.ts`, `auth.interceptor.ts` (adds JWT to requests), `http-response.interceptor.ts`
@@ -79,6 +82,7 @@ Client is served via HTTPS at `https://localhost:4200/en`. To change language, m
 ### Common Library (`libs/common/src/lib/`)
 
 Framework-agnostic shared code used by both API and client:
+
 - `config.ts`: Global constants (colors, queue settings, TTL values, data sources, asset classes)
 - `permissions.ts`: Role-based permission system (used with `without()` in `UserService` for feature flags)
 - `helper.ts`: Utility functions (financial calculations, transformations)
@@ -90,32 +94,26 @@ Framework-agnostic shared code used by both API and client:
 ### UI Library (`libs/ui/src/lib/`)
 
 40+ reusable Angular components with Storybook stories:
+
 - Data tables: `accounts-table/`, `activities-table/`, `holdings-table/`
 - Charts: `line-chart/`, `portfolio-proportion-chart/`, `treemap-chart/`, `world-map-chart/`
 - Selectors: `currency-selector/`, `symbol-autocomplete/`, `tags-selector/`
 
 ## Code Conventions
 
-### Style (Prettier + EditorConfig)
+**Full conventions document:** `gauntlet_docs/coding-conventions.md` — **Read this before writing any code.** It contains detailed patterns extracted from the actual codebase for NestJS modules, Angular components, Prisma queries, testing, LangChain tools, and a list of anti-patterns to avoid.
+
+### Quick Reference (see full doc for details)
+
 - 2-space indentation, single quotes, no trailing commas, 80-char print width
-- Unix line endings (LF), UTF-8
-- Import order enforced by `@trivago/prettier-plugin-sort-imports`:
-  1. `@ghostfolio/*` imports
-  2. Third-party imports
-  3. Relative imports
-- HTML attribute ordering via `prettier-plugin-organize-attributes` (Angular structural directives, inputs, two-way bindings, outputs)
-
-### Naming
-- **API modules**: `{feature}.controller.ts`, `{feature}.service.ts`, `{feature}.module.ts`
-- **Client components**: `{feature}.component.ts`, `.html`, `.scss` — selector prefix: `gf-`
-- **Tests**: `{filename}.spec.ts` (co-located with source)
-- **Stories**: `{filename}.stories.ts`
-
-### TypeScript
+- Import order: `@ghostfolio/*` → third-party → relative (enforced by Prettier)
+- File names: kebab-case. Classes: PascalCase. Angular selectors: `gf-` prefix.
+- Tests: co-located `*.spec.ts`. Named exports only — no `export default`.
 - Strict mode is **off**, but `noUnusedLocals` and `noUnusedParameters` are enforced
 - Target: ES2015, module resolution: bundler
 
 ### Experimental Features
+
 - **Backend**: Remove permission in `UserService` using `without()`
 - **Frontend**: Guard with `@if (user?.settings?.isExperimentalFeatures) {}` in templates
 
@@ -143,11 +141,11 @@ Framework-agnostic shared code used by both API and client:
 
 This Ghostfolio fork is being extended with an AI agent for the **AgentForge** training project (Gauntlet AI, Week 2). Key project documents live in `gauntlet_docs/`.
 
-- **Sprint Checklist:** `gauntlet_docs/agentforge-sprint-checklist.md` — the master checklist for all tasks, deadlines, and progress. Check this FIRST when starting a new session to understand where things stand and what to do next.
+- **Epics & Stories:** `gauntlet_docs/epics.md` — the source of truth for all tasks, deadlines, and progress. Check this FIRST when starting a new session to understand where things stand and what to do next.
 - **Project Requirements:** `gauntlet_docs/G4 Week 2 - AgentForge.pdf`
 - **Pre-Search Checklist:** `gauntlet_docs/PreSearch_Checklist_Finance.md`
-- **Decision Document:** `gauntlet_docs/Decision.md`
 - **Prisma Analysis:** `gauntlet_docs/prisma-upgrade-analysis.md`
+- **Brownfield System Docs:** `docs/index.md` — Pre-written documentation of the existing Ghostfolio codebase. **Read these BEFORE exploring source code.** Covers portfolio service, market data services, benchmarks endpoint, authentication, AI integration, and Prisma schema. If you need to understand how an existing service works, check `docs/` first.
 
 ### Key Technical Decisions
 
@@ -156,6 +154,7 @@ This Ghostfolio fork is being extended with an AI agent for the **AgentForge** t
 - **Deployment:** Railway
 - **MVP Tools (3):** portfolio_analysis, market_data, benchmark_compare
 - **Stay on Prisma 6** (do not upgrade to Prisma 7)
+- **Approved Versions:** `gauntlet_docs/techstack-approved-versions.md` is the source of truth for all dependency versions. Do NOT upgrade any package without checking this file first. Always use explicit versions when installing (`npm install <pkg>@<version>`).
 - **Agent Teams enabled** for parallel work in Phases 2, 4, and 5. **Read `gauntlet_docs/agent-teams-reference.md` before using.** Agent Teams is NOT the same as subagents — see the reference for critical differences and rules.
 - **Scoped brownfield documentation:** See `gauntlet_docs/documentation-approach.md` for the documentation strategy.
 
@@ -194,8 +193,15 @@ The project owner (Diane) is in **Mountain Time (America/Denver)**. When creatin
 
 ## Environment Setup
 
+**We run inside a devcontainer** (`.devcontainer/docker-compose.yml`). The `docker` CLI is NOT available inside this container. Three services are already running:
+
+- **app** — this container (Node.js, our workspace at `/workspace`)
+- **postgres** — PostgreSQL 17, accessible at hostname `postgres:5432`
+- **redis** — Redis 8, accessible at hostname `redis:6379`
+
+Do NOT attempt to run `docker` or `docker compose` commands — the services are already up and managed by the devcontainer host. Use `npm run database:setup`, `npm run start:server`, etc. directly.
+
 - Node.js >= 22.18.0
-- Copy `.env.dev` to `.env` and fill in passwords/secrets
-- Dev services: `docker compose -f docker/docker-compose.dev.yml up -d` (PostgreSQL + Redis)
+- `.env` is pre-configured with database and Redis credentials
 - SSL: Generate `localhost.cert` and `localhost.pem` in `apps/client/` for HTTPS dev server
-- `NX_ADD_PLUGINS=false` is set in `.env.dev` to disable Nx inferred tasks
+- `NX_ADD_PLUGINS=false` is set in `.env` to disable Nx inferred tasks

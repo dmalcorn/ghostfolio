@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add _bmad/tea/)"
+      "Bash(git add _bmad/tea/)",
+      "Bash(npx nx reset)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx nx run api:build:production)",
+      "Bash(npx nx run api:lint)",
+      "Bash(npm run format:check)",
+      "Bash(npm run format:write)",
+      "Bash(git add CLAUDE.md apps/api/src/app/endpoints/agent/ apps/api/src/app/app.module.ts libs/common/src/lib/permissions.ts package.json package-lock.json .env.example gauntlet_docs/ .claude/settings.json)"
     ]
   }
 }
