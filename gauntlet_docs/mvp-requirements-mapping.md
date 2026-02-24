@@ -356,4 +356,6 @@ gauntlet_docs/
   epics.md                                — Epic/story breakdown
   prd.md                                  — Product requirements document
   architecture.md                         — Architecture document
+  coding-conventions.md                   — Codebase patterns and style guide
+  product-brief-ghostfolio-2026-02-23.md  — Product brief
 ```
