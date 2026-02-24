@@ -2,20 +2,102 @@
 
 [<img src="https://avatars.githubusercontent.com/u/82473144?s=200" width="100" alt="Ghostfolio logo">](https://ghostfol.io)
 
-# Ghostfolio
+# Ghostfolio + AI Finance Agent
 
-**Open Source Wealth Management Software**
+**Open Source Wealth Management Software — Extended with an AI-Powered Financial Assistant**
 
-[**Ghostfol.io**](https://ghostfol.io) | [**Live Demo**](https://ghostfol.io/en/demo) | [**Ghostfolio Premium**](https://ghostfol.io/en/pricing) | [**FAQ**](https://ghostfol.io/en/faq) |
-[**Blog**](https://ghostfol.io/en/blog) | [**LinkedIn**](https://www.linkedin.com/company/ghostfolio) | [**Slack**](https://join.slack.com/t/ghostfolio/shared_invite/zt-vsaan64h-F_I0fEo5M0P88lP9ibCxFg) | [**X**](https://x.com/ghostfolio_)
+[**Live Deployment**](https://ghostfolio-production-72a0.up.railway.app/) | [**Ghostfol.io**](https://ghostfol.io) | [**Live Demo**](https://ghostfol.io/en/demo) | [**FAQ**](https://ghostfol.io/en/faq)
 
-[![Shield: Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-Support-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/ghostfolio)
-[![Shield: Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-limegreen.svg)](#contributing) [![Shield: Docker Pulls](https://img.shields.io/docker/pulls/ghostfolio/ghostfolio?label=Docker%20Pulls)](https://hub.docker.com/r/ghostfolio/ghostfolio)
 [![Shield: License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-orange.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 </div>
 
 **Ghostfolio** is an open source wealth management software built with web technology. The application empowers busy people to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions. The software is designed for personal use in continuous operation.
+
+---
+
+## AI Finance Agent (AgentForge Extension)
+
+This fork extends Ghostfolio with a **domain-specific AI agent** for natural language financial queries. Built for the [Gauntlet AI](https://gauntlet.ai) AgentForge project (Week 2).
+
+**Deployed at:** https://ghostfolio-production-72a0.up.railway.app/
+
+### What It Does
+
+Users can ask natural language questions about their financial data and receive coherent, data-driven responses. The agent retrieves real portfolio data, market prices, and benchmarks — then synthesizes them into actionable insights.
+
+Example queries:
+
+- "What's in my portfolio?"
+- "What's the current price of AAPL and MSFT?"
+- "How does my portfolio compare to the S&P 500?"
+
+### Architecture
+
+| Component       | Technology                              |
+| --------------- | --------------------------------------- |
+| Agent Framework | LangChain.js (TypeScript)               |
+| LLM             | Claude Sonnet 4 via OpenRouter          |
+| Observability   | LangSmith (project: `ghostfolio-agent`) |
+| Backend         | NestJS (integrated into Ghostfolio API) |
+| Database        | PostgreSQL 17 (Prisma ORM)              |
+| Caching         | Redis 8                                 |
+| Deployment      | Railway                                 |
+
+### Tools (3)
+
+| Tool                 | Purpose                                                                   |
+| -------------------- | ------------------------------------------------------------------------- |
+| `portfolio_analysis` | Retrieves user's portfolio holdings, allocations, and performance metrics |
+| `market_data`        | Looks up current market prices for up to 10 symbols                       |
+| `benchmark_compare`  | Lists benchmarks or compares portfolio performance vs. a benchmark        |
+
+### Verification
+
+- **Ticker Symbol Validation** — Post-response check that prevents the LLM from hallucinating fake ticker symbols by cross-referencing mentioned symbols against actual tool output data.
+
+### Evaluation Framework
+
+7 test cases covering happy paths, edge cases, safety boundaries, and multi-tool coordination. Run with:
+
+```bash
+npm run test:single -- apps/api/src/app/endpoints/agent/agent.eval.spec.ts
+```
+
+### Agent API Endpoint
+
+```
+POST /api/v1/agent/chat
+Authorization: Bearer <JWT>
+Content-Type: application/json
+
+{
+  "message": "What's in my portfolio?",
+  "conversationId": "optional-uuid-for-multi-turn"
+}
+```
+
+### Agent Environment Variables
+
+| Variable                 | Description                                                        |
+| ------------------------ | ------------------------------------------------------------------ |
+| `OPENROUTER_API_KEY`     | Required. API key for OpenRouter LLM access.                       |
+| `OPENROUTER_AGENT_MODEL` | Optional. Model ID (default: `anthropic/claude-sonnet-4-20250514`) |
+| `LANGCHAIN_TRACING_V2`   | Set to `true` to enable LangSmith tracing                          |
+| `LANGCHAIN_API_KEY`      | LangSmith API key for observability                                |
+| `LANGCHAIN_PROJECT`      | LangSmith project name (default: `ghostfolio-agent`)               |
+
+### Project Documents
+
+| Document                 | Location                                       |
+| ------------------------ | ---------------------------------------------- |
+| MVP Requirements Mapping | `gauntlet_docs/mvp-requirements-mapping.md`    |
+| Pre-Search Checklist     | `gauntlet_docs/PreSearch_Checklist_Finance.md` |
+| Epics & Stories          | `gauntlet_docs/epics.md`                       |
+| Architecture             | `gauntlet_docs/architecture.md`                |
+| PRD                      | `gauntlet_docs/prd.md`                         |
+
+---
 
 <div align="center">
 
