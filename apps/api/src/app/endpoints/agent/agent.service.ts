@@ -2,15 +2,16 @@ import { PortfolioService } from '@ghostfolio/api/app/portfolio/portfolio.servic
 import { ConfigurationService } from '@ghostfolio/api/services/configuration/configuration.service';
 import type { UserWithSettings } from '@ghostfolio/common/types';
 
-import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import {
-  ChatPromptTemplate,
-  MessagesPlaceholder
-} from '@langchain/core/prompts';
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+  ToolMessage
+} from '@langchain/core/messages';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { Injectable, Logger } from '@nestjs/common';
-import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -22,6 +23,8 @@ import { getSystemPrompt } from './prompts/system-prompt';
 import { createPortfolioAnalysisTool } from './tools/portfolio-analysis.tool';
 import { validateTickerSymbols } from './verification/ticker-validation';
 import { VerificationResult } from './verification/verification.interfaces';
+
+const MAX_ITERATIONS = 5;
 
 @Injectable()
 export class AgentService {
@@ -62,35 +65,27 @@ export class AgentService {
       );
     }
 
-    const prompt = ChatPromptTemplate.fromMessages([
-      ['system', getSystemPrompt(baseCurrency)],
-      new MessagesPlaceholder('chat_history'),
-      ['human', '{input}'],
-      new MessagesPlaceholder('agent_scratchpad')
-    ]);
-
-    const agent = await createToolCallingAgent({
-      llm: model,
-      tools,
-      prompt
-    });
-
-    const executor = new AgentExecutor({
-      agent,
-      tools,
-      maxIterations: 5,
-      returnIntermediateSteps: true
-    });
+    const modelWithTools = model.bindTools(tools);
 
     const chatHistory = this.getConversationHistory(resolvedConversationId);
 
-    let result: { output: string; intermediateSteps?: unknown[] };
+    const messages: BaseMessage[] = [
+      new SystemMessage(getSystemPrompt(baseCurrency)),
+      ...chatHistory,
+      new HumanMessage(message)
+    ];
+
+    const toolCallRecords: ToolCallRecord[] = [];
+
+    let finalResponse: string;
 
     try {
-      result = await executor.invoke({
-        input: message,
-        chat_history: chatHistory
-      });
+      finalResponse = await this.runToolCallingLoop(
+        modelWithTools,
+        messages,
+        tools,
+        toolCallRecords
+      );
     } catch (error) {
       this.logger.error('Agent execution failed', error);
 
@@ -98,7 +93,10 @@ export class AgentService {
         error instanceof Error ? error.message : 'Unknown error';
 
       // Check for LLM provider errors
-      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+      if (
+        errorMessage.includes('429') ||
+        errorMessage.includes('rate limit')
+      ) {
         throw new LlmUnavailableError(
           'The AI service is currently rate-limited. Please wait a moment and try again.'
         );
@@ -133,27 +131,20 @@ export class AgentService {
       };
     }
 
-    const toolCalls = this.extractToolCalls(
-      result.intermediateSteps as {
-        action: { tool: string; toolInput: object };
-        observation: string;
-      }[]
-    );
-
     // Run verification pipeline
-    const verification = this.runVerification(result.output, toolCalls);
+    const verification = this.runVerification(finalResponse, toolCallRecords);
 
     this.saveConversationHistory(
       resolvedConversationId,
       message,
-      result.output
+      finalResponse
     );
 
     const latencyMs = Date.now() - startTime;
 
     return {
-      response: result.output,
-      toolCalls,
+      response: finalResponse,
+      toolCalls: toolCallRecords,
       conversationId: resolvedConversationId,
       verification,
       metadata: {
@@ -164,6 +155,73 @@ export class AgentService {
         latencyMs
       }
     };
+  }
+
+  private async runToolCallingLoop(
+    model: ReturnType<ChatOpenAI['bindTools']>,
+    messages: BaseMessage[],
+    tools: DynamicStructuredTool[],
+    toolCallRecords: ToolCallRecord[]
+  ): Promise<string> {
+    const toolMap = new Map(tools.map((t) => [t.name, t]));
+
+    for (let i = 0; i < MAX_ITERATIONS; i++) {
+      const response = await model.invoke(messages);
+
+      messages.push(response);
+
+      const toolCalls = response.tool_calls ?? [];
+
+      if (toolCalls.length === 0) {
+        // No tool calls — return the text response
+        return typeof response.content === 'string'
+          ? response.content
+          : JSON.stringify(response.content);
+      }
+
+      // Execute each tool call
+      for (const toolCall of toolCalls) {
+        const tool = toolMap.get(toolCall.name);
+
+        if (!tool) {
+          const errorResult = JSON.stringify({
+            error: true,
+            message: `Unknown tool: ${toolCall.name}`
+          });
+
+          messages.push(
+            new ToolMessage({
+              tool_call_id: toolCall.id ?? toolCall.name,
+              content: errorResult
+            })
+          );
+
+          continue;
+        }
+
+        const result = await tool.invoke(toolCall.args);
+
+        toolCallRecords.push({
+          name: toolCall.name,
+          input: toolCall.args,
+          output: this.safeParseJson(result)
+        });
+
+        messages.push(
+          new ToolMessage({
+            tool_call_id: toolCall.id ?? toolCall.name,
+            content: result
+          })
+        );
+      }
+    }
+
+    // If we exhausted iterations, get a final response without tools
+    const finalResponse = await model.invoke(messages);
+
+    return typeof finalResponse.content === 'string'
+      ? finalResponse.content
+      : JSON.stringify(finalResponse.content);
   }
 
   private createTools(context: ToolContext): DynamicStructuredTool[] {
@@ -225,23 +283,6 @@ export class AgentService {
     messages.push(new AIMessage(assistantMessage));
 
     this.conversations.set(conversationId, { messages });
-  }
-
-  private extractToolCalls(
-    intermediateSteps: {
-      action: { tool: string; toolInput: object };
-      observation: string;
-    }[]
-  ): ToolCallRecord[] {
-    if (!intermediateSteps) {
-      return [];
-    }
-
-    return intermediateSteps.map((step) => ({
-      name: step.action.tool,
-      input: step.action.toolInput,
-      output: this.safeParseJson(step.observation)
-    }));
   }
 
   private safeParseJson(text: string): object {

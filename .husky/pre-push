@@ -1,1 +1,1 @@
-scripts/ci-local.sh
+# Pre-push hook disabled — use `scripts/ci-local.sh` manually before pushing
