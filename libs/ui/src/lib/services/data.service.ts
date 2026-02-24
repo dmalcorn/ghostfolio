@@ -21,6 +21,7 @@ import {
   Access,
   AccessTokenResponse,
   AccountBalancesResponse,
+  AgentChatResponse,
   AccountResponse,
   AccountsResponse,
   ActivitiesResponse,
@@ -170,6 +171,19 @@ export class DataService {
     }
 
     return params;
+  }
+
+  public chatWithAgent({
+    conversationId,
+    message
+  }: {
+    conversationId?: string;
+    message: string;
+  }) {
+    return this.http.post<AgentChatResponse>('/api/v1/agent/chat', {
+      conversationId,
+      message
+    });
   }
 
   public createStripeCheckoutSession({

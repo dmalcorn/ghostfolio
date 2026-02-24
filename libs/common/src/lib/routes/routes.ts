@@ -33,6 +33,11 @@ export const internalRoutes: Record<string, InternalRoute> = {
     },
     title: $localize`Settings`
   },
+  aiAgent: {
+    path: 'ai-agent',
+    routerLink: ['/ai-agent'],
+    title: $localize`AI Agent`
+  },
   adminControl: {
     excludeFromAssistant: (aUser: User) => {
       return hasPermission(aUser?.permissions, permissions.accessAdminControl);
