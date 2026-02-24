@@ -10,7 +10,25 @@
       "Bash(git add CLAUDE.md apps/api/src/app/endpoints/agent/ apps/api/src/app/app.module.ts libs/common/src/lib/permissions.ts package.json package-lock.json .env.example gauntlet_docs/ .claude/settings.json)",
       "Bash(git push origin main)",
       "Bash(git push --no-verify origin main)",
-      "Bash(git add Dockerfile)"
+      "Bash(git add Dockerfile)",
+      "Bash(node -e \"const pkg = require\\(''/workspace/node_modules/langchain/package.json''\\); const agents = Object.keys\\(pkg.exports\\).filter\\(k => k.includes\\(''agent''\\)\\); console.log\\(agents\\);\")",
+      "Bash(node -e \"const pkg = require\\(''/workspace/node_modules/langchain/package.json''\\); console.log\\(JSON.stringify\\(Object.keys\\(pkg.exports\\).sort\\(\\), null, 2\\)\\);\")",
+      "Bash(node -e \":*)",
+      "Bash(npx nx build api)",
+      "WebFetch(domain:docs.railway.com)",
+      "Bash(npx prettier --write apps/api/src/app/endpoints/agent/tools/market-data.tool.ts apps/api/src/app/endpoints/agent/tools/benchmark-compare.tool.ts apps/api/src/app/endpoints/agent/agent.service.ts apps/api/src/app/endpoints/agent/interfaces/agent.interfaces.ts apps/api/src/app/endpoints/agent/prompts/system-prompt.ts apps/api/src/app/endpoints/agent/verification/ticker-validation.ts)",
+      "Bash(npm run format:write -- --uncommitted)",
+      "Bash(./node_modules/.bin/prettier --write apps/api/src/app/endpoints/agent/tools/market-data.tool.ts apps/api/src/app/endpoints/agent/tools/benchmark-compare.tool.ts apps/api/src/app/endpoints/agent/agent.service.ts apps/api/src/app/endpoints/agent/interfaces/agent.interfaces.ts apps/api/src/app/endpoints/agent/prompts/system-prompt.ts apps/api/src/app/endpoints/agent/verification/ticker-validation.ts)",
+      "Bash(ls node_modules/.bin/pret*)",
+      "Bash(npx --no-install prettier --version)",
+      "Bash(npm ls prettier)",
+      "Bash(node -e \"require.resolve\\(''prettier''\\)\")",
+      "Bash(npm run build:production)",
+      "Bash(npx nx run api:build:production)",
+      "Bash(npm install)",
+      "Bash(npm install --legacy-peer-deps)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx tsc --noEmit --project apps/api/tsconfig.app.json)",
+      "Bash(npm run test:api)"
     ]
   }
 }

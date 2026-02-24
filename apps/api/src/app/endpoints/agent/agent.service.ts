@@ -1,5 +1,8 @@
 import { PortfolioService } from '@ghostfolio/api/app/portfolio/portfolio.service';
+import { BenchmarkService } from '@ghostfolio/api/services/benchmark/benchmark.service';
 import { ConfigurationService } from '@ghostfolio/api/services/configuration/configuration.service';
+import { DataProviderService } from '@ghostfolio/api/services/data-provider/data-provider.service';
+import { PrismaService } from '@ghostfolio/api/services/prisma/prisma.service';
 import type { UserWithSettings } from '@ghostfolio/common/types';
 
 import {
@@ -20,6 +23,8 @@ import {
   ToolContext
 } from './interfaces/agent.interfaces';
 import { getSystemPrompt } from './prompts/system-prompt';
+import { createBenchmarkCompareTool } from './tools/benchmark-compare.tool';
+import { createMarketDataTool } from './tools/market-data.tool';
 import { createPortfolioAnalysisTool } from './tools/portfolio-analysis.tool';
 import { validateTickerSymbols } from './verification/ticker-validation';
 import { VerificationResult } from './verification/verification.interfaces';
@@ -36,8 +41,11 @@ export class AgentService {
   >();
 
   public constructor(
+    private readonly benchmarkService: BenchmarkService,
     private readonly configurationService: ConfigurationService,
-    private readonly portfolioService: PortfolioService
+    private readonly dataProviderService: DataProviderService,
+    private readonly portfolioService: PortfolioService,
+    private readonly prismaService: PrismaService
   ) {}
 
   public async chat(
@@ -51,7 +59,7 @@ export class AgentService {
 
     const baseCurrency = user.settings?.settings?.baseCurrency ?? 'USD';
 
-    const tools = this.createTools({ userId: user.id, baseCurrency });
+    const tools = this.createTools({ userId: user.id, baseCurrency, user });
 
     let model: ChatOpenAI;
 
@@ -225,7 +233,20 @@ export class AgentService {
   }
 
   private createTools(context: ToolContext): DynamicStructuredTool[] {
-    return [createPortfolioAnalysisTool(context, this.portfolioService)];
+    return [
+      createPortfolioAnalysisTool(context, this.portfolioService),
+      createMarketDataTool(
+        context,
+        this.dataProviderService,
+        this.prismaService
+      ),
+      createBenchmarkCompareTool(
+        context,
+        this.benchmarkService,
+        this.dataProviderService,
+        this.portfolioService
+      )
+    ];
   }
 
   private createModel(): ChatOpenAI {

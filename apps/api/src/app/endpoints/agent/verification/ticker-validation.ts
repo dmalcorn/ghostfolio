@@ -184,12 +184,32 @@ function extractKnownSymbols(toolCalls: ToolCallRecord[]): Set<string> {
       }
     }
 
-    // Extract symbols from market_data output (future)
+    // Extract symbols from market_data output
     if (output?.quotes && typeof output.quotes === 'object') {
       for (const symbol of Object.keys(
         output.quotes as Record<string, unknown>
       )) {
         symbols.add(symbol);
+      }
+    }
+
+    // Extract symbols from benchmark_compare output (compare mode)
+    if (output?.benchmark && typeof output.benchmark === 'object') {
+      const benchmark = output.benchmark as Record<string, unknown>;
+
+      if (benchmark?.symbol) {
+        symbols.add(String(benchmark.symbol));
+      }
+    }
+
+    // Extract symbols from benchmark_compare output (list mode)
+    if (output?.benchmarks && Array.isArray(output.benchmarks)) {
+      for (const b of output.benchmarks) {
+        const benchmark = b as Record<string, unknown>;
+
+        if (benchmark?.symbol) {
+          symbols.add(String(benchmark.symbol));
+        }
       }
     }
   }

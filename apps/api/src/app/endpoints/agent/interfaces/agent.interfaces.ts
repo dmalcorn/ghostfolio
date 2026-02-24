@@ -1,6 +1,9 @@
+import type { UserWithSettings } from '@ghostfolio/common/types';
+
 export interface ToolContext {
   userId: string;
   baseCurrency: string;
+  user: UserWithSettings;
 }
 
 export interface AgentResponse {

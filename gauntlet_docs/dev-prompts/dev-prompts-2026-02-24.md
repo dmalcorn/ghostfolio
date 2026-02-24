@@ -217,3 +217,40 @@ Skipped item 5 (stripping all implementation details from FRs) — deferred as l
 - `gauntlet_docs/epics.md` (created — complete epic breakdown, 8 epics, 28 stories, 48/48 FR coverage, validated)
 
 ---
+
+### Prompt 10 — EPIC-1 Implementation & Deployment
+
+**User:** Requested implementation of EPIC-1 stories (foundation agent, portfolio tool, deployment to Railway).
+**Agent:** Sessions prior to this prompt implemented all 6 stories of EPIC-1, resulting in a fully deployed and verified agent on Railway with the `portfolio_analysis` tool.
+**Artifacts:** See git commits `68d1e37fd` through `1ba11a815` for the complete EPIC-1 implementation.
+
+---
+
+### Prompt 11 — EPIC-2: Market Data & Benchmark Analysis (MVP Completion)
+
+**User:** Requested EPIC-2 implementation — two new tools (`market_data`, `benchmark_compare`), multi-turn conversation verification, and multi-tool chaining verification.
+**Agent:** Explored existing agent architecture, market data services (DataProviderService), benchmark services (BenchmarkService), and conversation memory implementation. Designed and executed implementation plan:
+
+1. **Expanded ToolContext** — Added `user: UserWithSettings` field to support DataProviderService.search() which requires full user context for subscription-level filtering
+2. **Created `market_data` tool** — Two-phase symbol resolution (DB lookup first, external provider search fallback), batch quote fetching via DataProviderService.getQuotes(), supports up to 10 symbols, graceful error handling for invalid symbols
+3. **Created `benchmark_compare` tool** — Two modes: "list" (returns available benchmarks with market condition, trends, ATH data) and "compare" (portfolio performance via PortfolioService.getPerformance() alongside benchmark data)
+4. **Injected services** — Added BenchmarkService, DataProviderService, PrismaService to AgentService constructor (all already available via module imports)
+5. **Updated system prompt** — Added explicit Available Tools section and Tool Usage Guidelines for multi-tool query routing
+6. **Updated ticker validation** — Added benchmark symbol extraction to prevent false positives on benchmark symbols in responses
+7. **Verified** — Production build succeeded, all 24 existing test suites pass (30 tests, 0 regressions)
+
+Key design decisions:
+- No `agent.module.ts` changes needed (BenchmarkModule, DataProviderModule, PrismaModule already imported)
+- In-memory conversation memory kept for MVP (Redis upgrade planned for Epic 5 per epics.md)
+- Multi-tool chaining already supported by existing tool-calling loop (MAX_ITERATIONS=5)
+- Benchmark comparison uses available data (portfolio return + benchmark condition/ATH/trends) rather than requiring endpoint-level BenchmarksService
+
+**Artifacts:**
+- `apps/api/src/app/endpoints/agent/tools/market-data.tool.ts` (created)
+- `apps/api/src/app/endpoints/agent/tools/benchmark-compare.tool.ts` (created)
+- `apps/api/src/app/endpoints/agent/agent.service.ts` (modified — new DI, tool registration)
+- `apps/api/src/app/endpoints/agent/interfaces/agent.interfaces.ts` (modified — ToolContext expansion)
+- `apps/api/src/app/endpoints/agent/prompts/system-prompt.ts` (modified — tool descriptions)
+- `apps/api/src/app/endpoints/agent/verification/ticker-validation.ts` (modified — benchmark extraction)
+
+---

@@ -19,6 +19,6 @@
       }
     }
   },
-  "postCreateCommand": "git config user.name 'Diane Alcorn' && git config user.email 'dianealcorn@gmail.com' && rm -rf node_modules && npm install",
+  "postCreateCommand": "rm -rf node_modules && npm install",
   "remoteUser": "node"
 }
