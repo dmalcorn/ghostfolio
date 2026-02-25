@@ -127,7 +127,7 @@ export class AgentService {
         metadata: {
           model:
             process.env.OPENROUTER_AGENT_MODEL ??
-            'anthropic/claude-sonnet-4-20250514',
+            'anthropic/claude-sonnet-4',
           tokensUsed: 0,
           latencyMs
         }
@@ -153,7 +153,7 @@ export class AgentService {
       metadata: {
         model:
           process.env.OPENROUTER_AGENT_MODEL ??
-          'anthropic/claude-sonnet-4-20250514',
+          'anthropic/claude-sonnet-4',
         tokensUsed: 0,
         latencyMs
       }
@@ -247,7 +247,7 @@ export class AgentService {
   private createModel(): ChatOpenAI {
     const modelName =
       process.env.OPENROUTER_AGENT_MODEL ??
-      'anthropic/claude-sonnet-4-20250514';
+      'anthropic/claude-sonnet-4';
 
     return new ChatOpenAI({
       modelName,

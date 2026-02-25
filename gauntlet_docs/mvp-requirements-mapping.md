@@ -45,7 +45,7 @@ This mapping separates requirements into two tiers:
 | Auth           | JWT-protected with `HasPermissionGuard` (permission: `accessAgentChat`)                                                       |
 | Controller     | `apps/api/src/app/endpoints/agent/agent.controller.ts` (87 lines)                                                             |
 | Service        | `apps/api/src/app/endpoints/agent/agent.service.ts` (318 lines)                                                               |
-| LLM            | OpenRouter → Claude Sonnet 4 (`anthropic/claude-sonnet-4-20250514`) via LangChain `ChatOpenAI`                                |
+| LLM            | OpenRouter → Claude Sonnet 4 (`anthropic/claude-sonnet-4`) via LangChain `ChatOpenAI`                                |
 | System Prompt  | `apps/api/src/app/endpoints/agent/prompts/system-prompt.ts` — defines the agent as a finance assistant with safety boundaries |
 | Input Handling | Sanitizes control characters, enforces 10KB max, validates non-empty                                                          |
 

@@ -234,7 +234,7 @@ POST /api/v1/agent/chat
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=<langsmith-key>
 LANGCHAIN_PROJECT=ghostfolio-agent
-OPENROUTER_AGENT_MODEL=anthropic/claude-sonnet-4-20250514
+OPENROUTER_AGENT_MODEL=anthropic/claude-sonnet-4
 ```
 
 ### Tool Specifications
@@ -259,7 +259,7 @@ OPENROUTER_AGENT_MODEL=anthropic/claude-sonnet-4-20250514
 
 | Priority | Model | OpenRouter ID |
 |----------|-------|---------------|
-| Primary | Claude Sonnet 4 | `anthropic/claude-sonnet-4-20250514` |
+| Primary | Claude Sonnet 4 | `anthropic/claude-sonnet-4` |
 | Alternative | GPT-4o | `openai/gpt-4o` |
 | Fallback | GPT-4o Mini | `openai/gpt-4o-mini` |
 

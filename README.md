@@ -77,12 +77,80 @@ Content-Type: application/json
 }
 ```
 
+### Chat UI
+
+The AI agent includes a built-in chat interface. You must be logged in to access it.
+
+| Environment          | URL                                                                  |
+| -------------------- | -------------------------------------------------------------------- |
+| **Local development** | `https://localhost:4200/en/ai-agent`                                |
+| **Railway deployment** | `https://ghostfolio-production-72a0.up.railway.app/en/ai-agent`    |
+
+> **Note:** The `/en/` prefix is the locale segment (English). It is required — navigating to just `/ai-agent` will not work. Replace `en` with another locale code (e.g., `de`, `fr`) if running in a different language.
+
+The chat page is an authenticated route. Log in first (via _Get Started_ or the demo account if configured), then navigate to the URL above.
+
+#### Quick Access from the Home Page
+
+After logging in, you can reach the AI Agent directly from the home overview page:
+
+- **Populated portfolio** (users with activities) — An "Ask the AI Agent" card appears below the performance metrics. It links directly to the chat page.
+- **Empty portfolio** (welcome screen) — A 4th item in the onboarding checklist: "Talk to the AI Agent" with the description "Get personalized insights and ask questions about your investments."
+
+Both entry points are guarded by the `accessAgentChat` permission and appear for users with ADMIN, USER, and DEMO roles.
+
+### Try It Out — Example Commands
+
+Once you're on the chat page, you can ask the agent natural language questions. Here are examples organized by category:
+
+#### Portfolio Questions
+
+- "What's in my portfolio?"
+- "Show me my holdings"
+- "How is my portfolio diversified?"
+- "What's my performance this year?"
+- "How much am I up or down?"
+- "Tell me about my accounts"
+- "What's my total net worth?"
+
+You can also specify a time range: `1d`, `wtd`, `mtd`, `ytd`, `1y`, `5y`, or `max`.
+
+#### Market Data / Price Quotes
+
+- "What's the price of AAPL?"
+- "Show me prices for MSFT, GOOGL, and NVDA" (up to 10 symbols at once)
+- "What's Bitcoin trading at?"
+- "Is the market open?"
+
+#### Benchmark Comparisons
+
+- "What benchmarks are available?"
+- "How does my portfolio compare to the S&P 500?"
+- "Am I beating the market?"
+- "Compare my returns to Bitcoin over the last 5 years"
+
+#### Combined / Multi-step Questions
+
+The agent can chain tools together in a single query:
+
+- "Show me my AAPL holding and its current market price"
+- "What percentage of my portfolio is in tech, and how has it performed vs the S&P 500?"
+
+#### What the Agent Will Not Do
+
+- Execute trades or modify your portfolio
+- Give specific financial advice ("Should I buy X?")
+- Make price predictions ("Will BTC hit $100k?")
+- Answer non-financial questions (medical, legal, etc.)
+
+All responses include a disclaimer that the information is for educational purposes only and is not financial advice.
+
 ### Agent Environment Variables
 
 | Variable                 | Description                                                        |
 | ------------------------ | ------------------------------------------------------------------ |
 | `OPENROUTER_API_KEY`     | Required. API key for OpenRouter LLM access.                       |
-| `OPENROUTER_AGENT_MODEL` | Optional. Model ID (default: `anthropic/claude-sonnet-4-20250514`) |
+| `OPENROUTER_AGENT_MODEL` | Optional. Model ID (default: `anthropic/claude-sonnet-4`) |
 | `LANGCHAIN_TRACING_V2`   | Set to `true` to enable LangSmith tracing                          |
 | `LANGCHAIN_API_KEY`      | LangSmith API key for observability                                |
 | `LANGCHAIN_PROJECT`      | LangSmith project name (default: `ghostfolio-agent`)               |
@@ -232,6 +300,31 @@ docker compose -f docker/docker-compose.build.yml up -d
 
 1. Open http://localhost:3333 in your browser
 1. Create a new user via _Get Started_ (this first user will get the role `ADMIN`)
+
+#### Demo Mode
+
+Demo mode allows visitors to explore Ghostfolio with sample data without creating an account. When configured, a _Live Demo_ button appears on the landing page.
+
+Demo mode is configured via the `Property` table in the database (key-value store), **not** via environment variables. You need to set two properties:
+
+| Property Key      | Value                                      | Description                                                      |
+| ----------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| `DEMO_USER_ID`    | The `id` of the demo user (UUID)           | The user account whose portfolio will be shown in demo mode      |
+| `DEMO_ACCOUNT_ID` | The `id` of the demo account (UUID)        | The account used when syncing demo activities                    |
+
+**Steps to enable demo mode:**
+
+1. Create a regular user account (this will be the demo user)
+2. Add some sample activities to the demo user's portfolio
+3. Insert the two properties into the database:
+   ```sql
+   INSERT INTO "Property" ("key", "value") VALUES ('DEMO_USER_ID', '"<USER_UUID>"');
+   INSERT INTO "Property" ("key", "value") VALUES ('DEMO_ACCOUNT_ID', '"<ACCOUNT_UUID>"');
+   ```
+   **Note:** The value must be a JSON string (wrapped in double quotes inside single quotes).
+4. Optionally, tag activities with the built-in demo tag (ID: `efa08cb3-9b9d-4974-ac68-db13a19c4874`) and use the admin _Sync Demo User Account_ action to refresh demo data
+
+Once configured, the `/api/v1/info` endpoint will return a `demoAuthToken`, and the frontend landing page will show the demo access option. Visiting `/demo` will automatically sign in the visitor as the demo user in read-only mode.
 
 #### Upgrade Version
 
