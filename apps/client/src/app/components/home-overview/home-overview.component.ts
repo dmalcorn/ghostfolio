@@ -46,6 +46,7 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
   public errors: AssetProfileIdentifier[];
   public hasError: boolean;
   public hasImpersonationId: boolean;
+  public hasPermissionToAccessAgentChat: boolean;
   public hasPermissionToCreateActivity: boolean;
   public historicalDataItems: LineChartItem[];
   public isAllTimeHigh: boolean;
@@ -55,6 +56,7 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
   public performanceLabel = $localize`Performance`;
   public precision = 2;
   public routerLinkAccounts = internalRoutes.accounts.routerLink;
+  public routerLinkAiAgent = internalRoutes.aiAgent.routerLink;
   public routerLinkPortfolio = internalRoutes.portfolio.routerLink;
   public routerLinkPortfolioActivities =
     internalRoutes.portfolio.subRoutes.activities.routerLink;
@@ -77,6 +79,11 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
       .subscribe((state) => {
         if (state?.user) {
           this.user = state.user;
+
+          this.hasPermissionToAccessAgentChat = hasPermission(
+            this.user.permissions,
+            permissions.accessAgentChat
+          );
 
           this.hasPermissionToCreateActivity = hasPermission(
             this.user.permissions,

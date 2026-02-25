@@ -41,6 +41,17 @@
               >
             </a>
           </li>
+          @if (hasPermissionToAccessAgentChat) {
+            <li class="mb-2">
+              <a class="d-block" [routerLink]="routerLinkAiAgent">
+                <span i18n>Talk to the AI Agent</span><br />
+                <span class="font-weight-normal" i18n
+                  >Get personalized insights and ask questions about your
+                  investments.</span
+                >
+              </a>
+            </li>
+          }
         </ol>
         <div class="d-flex justify-content-center">
           @if (user?.accounts?.length === 1) {
@@ -102,5 +113,23 @@
         />
       </div>
     </div>
+    @if (hasPermissionToAccessAgentChat) {
+      <div class="agent-cta row w-100">
+        <div class="col d-flex justify-content-center">
+          <a
+            class="agent-cta-card align-items-center d-flex"
+            [routerLink]="routerLinkAiAgent"
+          >
+            <div>
+              <div class="font-weight-bold" i18n>Ask the AI Agent</div>
+              <div class="text-muted" i18n>
+                Get insights about your portfolio performance and holdings
+              </div>
+            </div>
+            <span class="agent-cta-arrow ml-3">&rsaquo;</span>
+          </a>
+        </div>
+      </div>
+    }
   }
 </div>
