@@ -70,7 +70,10 @@ export function createPortfolioAnalysisTool(
           accounts,
           summary: details.summary ?? null,
           hasErrors: details.hasErrors,
-          dataRetrievedAt: new Date().toISOString()
+          dataRetrievedAt:
+            new Date().toLocaleString('en-US', {
+              timeZone: 'America/New_York'
+            }) + ' ET'
         };
 
         return JSON.stringify(result);

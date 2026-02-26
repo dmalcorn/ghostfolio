@@ -231,12 +231,13 @@ Users can chat with the agent directly in Ghostfolio's web interface. LOWEST PRI
 **FRs covered:** FR42, FR43, FR44, FR45
 **Completed:** 2026-02-26 — Full chat UI at `/ai-agent` with permission gating, auto-focus, clickable example prompts, tool call visualization, verification alerts, error handling, loading states, markdown rendering, and accessibility (aria-labels, roles).
 
-### Epic 8: Submission Deliverables (Final)
+### Epic 8: Submission Deliverables (Final) — IN PROGRESS
 
 Evaluators receive a complete submission package: cost analysis, architecture doc, open source contribution, demo video, and social post.
 **Deadline:** Final (Sunday) 10:59 PM CT
 **Agent Teams:** YES — Teammate 1: cost analysis, Teammate 2: architecture doc, Teammate 3: OSS + social post, Lead: demo coordination + packaging
 **FRs covered:** Project requirements (non-FR deliverables)
+**Progress:** Stories 8.1 (cost analysis), 8.2 (architecture summary), 8.4 (demo script) complete. Story 8.3 (OSS contribution) pending Diane's decision. Demo recording + social post pending Diane.
 
 ---
 
@@ -967,6 +968,7 @@ So that I can assess the economic viability of the agent.
 **Then** it includes recommendations for cost optimization (model routing, caching, prompt optimization)
 
 **Agent Teams:** Teammate 1.
+**Completed:** 2026-02-26 — `gauntlet_docs/cost-analysis.md` with actual dev costs (~$4.18), per-query estimates ($0.006-$0.024), production projections (100-100K users), and 3 tiers of optimization recommendations.
 
 ---
 
@@ -991,6 +993,7 @@ So that I can assess the technical quality and decision-making behind the implem
 **Then** it is 1-2 pages, concise, with clear diagrams
 
 **Agent Teams:** Teammate 2.
+**Completed:** 2026-02-26 — `gauntlet_docs/architecture-summary.md` (~2 pages) condensed from `architecture.md` (528 lines). Covers all 6 sections: domain, architecture + diagram, verification, eval results (100% pass rate), observability, OSS placeholder. Original `architecture.md` preserved.
 
 ---
 
@@ -1039,3 +1042,4 @@ So that the submission is complete with all required deliverables.
 **Then** everything is submitted before 10:59 PM CT Sunday
 
 **Note:** Demo video requires Diane's hands-on involvement — not delegable to agent.
+**Progress:** 2026-02-26 — `gauntlet_docs/demo-video-script.md` created with 5-segment script (intro, NL queries, multi-tool, verification, eval results, observability), timing cues, pre-recording checklist, social post templates (X + LinkedIn). Recording + posting pending Diane.

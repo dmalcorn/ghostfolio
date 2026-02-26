@@ -77,3 +77,27 @@ Production build passed successfully. Updated epics.md to mark Epic 7 as COMPLET
 - `gauntlet_docs/epics.md` (modified — Epic 7 marked COMPLETE)
 
 ---
+
+### Prompt 4 — Epic 8: Submission Deliverables (Stories 8.1, 8.2, 8.4)
+
+**User:** Requested implementation of Epic 8 submission deliverables. Constraints: preserve original `architecture.md` (create `architecture-summary.md` instead), do NOT finalize open source contribution choice for Story 8.3, store demo video script in `gauntlet_docs/`.
+
+**Agent:** Analyzed Epic 8 requirements against completed Epics 1-7. Created 4 deliverable files:
+
+1. **Cost Analysis** (`cost-analysis.md`): Actual dev costs (~$4.18 total), per-query estimates ($0.006-$0.024), production projections for 100/1K/10K/100K users, 3 tiers of optimization recommendations (prompt compression, model routing with 58% savings, architecture changes).
+2. **Architecture Summary** (`architecture-summary.md`): Condensed 528-line architecture doc to ~2 pages covering all 6 required sections with ASCII data flow diagram. Original `architecture.md` untouched.
+3. **Demo Video Script** (`demo-video-script.md`): 5-segment script with timing cues (intro → NL queries → multi-tool → verification → eval → observability → wrap-up), pre-recording checklist, social post templates for X and LinkedIn.
+4. **Implementation Plan** (`epic-8-implementation-plan.md`): Tracks all Epic 8 deliverables with status, includes 3 open source contribution options (eval dataset, tool template, verification docs) for Diane's decision.
+
+Story 8.3 (OSS contribution) left as options analysis — awaiting Diane's decision. Story 8.4 demo recording + social post are Diane's manual tasks.
+
+**Artifacts:**
+
+- `gauntlet_docs/epic-8-implementation-plan.md` (created)
+- `gauntlet_docs/cost-analysis.md` (created)
+- `gauntlet_docs/architecture-summary.md` (created)
+- `gauntlet_docs/demo-video-script.md` (created)
+- `gauntlet_docs/epics.md` (modified — Epic 8 stories 8.1, 8.2, 8.4 marked with progress)
+- `gauntlet_docs/dev-prompts/dev-prompts-2026-02-26.md` (appended)
+
+---

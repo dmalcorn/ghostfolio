@@ -45,7 +45,10 @@ export function createSymbolSearchTool(
             query,
             totalResults: 0,
             message: `No results found for "${query}". Try a different search term or check the spelling.`,
-            retrievedAt: new Date().toISOString()
+            retrievedAt:
+              new Date().toLocaleString('en-US', {
+                timeZone: 'America/New_York'
+              }) + ' ET'
           });
         }
 
@@ -62,7 +65,10 @@ export function createSymbolSearchTool(
           results,
           query,
           totalResults: results.length,
-          retrievedAt: new Date().toISOString()
+          retrievedAt:
+            new Date().toLocaleString('en-US', {
+              timeZone: 'America/New_York'
+            }) + ' ET'
         });
       } catch (error) {
         return JSON.stringify({

@@ -52,11 +52,14 @@ export function createBenchmarkCompareTool(
               trend200d: b.trend200d,
               allTimeHighDate: b.performances.allTimeHigh.date,
               performanceFromATH:
-                (
-                  b.performances.allTimeHigh.performancePercent * 100
-                ).toFixed(2) + '%'
+                (b.performances.allTimeHigh.performancePercent * 100).toFixed(
+                  2
+                ) + '%'
             })),
-            retrievedAt: new Date().toISOString()
+            retrievedAt:
+              new Date().toLocaleString('en-US', {
+                timeZone: 'America/New_York'
+              }) + ' ET'
           };
 
           return JSON.stringify(result);
@@ -66,8 +69,7 @@ export function createBenchmarkCompareTool(
         if (!input.benchmarkSymbol) {
           return JSON.stringify({
             error: true,
-            message:
-              'A benchmark symbol is required for compare mode.',
+            message: 'A benchmark symbol is required for compare mode.',
             suggestion:
               'Use "list" mode first to see available benchmarks, then specify a benchmarkSymbol.',
             availableBenchmarks: benchmarks.map((b) => ({
@@ -77,9 +79,7 @@ export function createBenchmarkCompareTool(
           });
         }
 
-        const targetSymbol = input.benchmarkSymbol
-          .trim()
-          .toUpperCase();
+        const targetSymbol = input.benchmarkSymbol.trim().toUpperCase();
         const benchmark = benchmarks.find(
           (b) => b.symbol.toUpperCase() === targetSymbol
         );
@@ -88,8 +88,7 @@ export function createBenchmarkCompareTool(
           return JSON.stringify({
             error: true,
             message: `Benchmark "${input.benchmarkSymbol}" is not configured.`,
-            suggestion:
-              'Choose from the available benchmarks listed below.',
+            suggestion: 'Choose from the available benchmarks listed below.',
             availableBenchmarks: benchmarks.map((b) => ({
               name: b.name,
               symbol: b.symbol
@@ -100,13 +99,12 @@ export function createBenchmarkCompareTool(
         const dateRange = input.dateRange ?? 'ytd';
 
         // Get portfolio performance for the date range
-        const portfolioPerformance =
-          await portfolioService.getPerformance({
-            dateRange,
-            filters: [],
-            impersonationId: undefined,
-            userId: context.userId
-          });
+        const portfolioPerformance = await portfolioService.getPerformance({
+          dateRange,
+          filters: [],
+          impersonationId: undefined,
+          userId: context.userId
+        });
 
         // Get current benchmark quote
         let benchmarkPrice: number | undefined;
@@ -122,8 +120,7 @@ export function createBenchmarkCompareTool(
             user: context.user
           });
 
-          benchmarkPrice =
-            quotes[benchmark.symbol]?.marketPrice;
+          benchmarkPrice = quotes[benchmark.symbol]?.marketPrice;
         } catch {
           // Quote fetch failed — continue with available data
         }
@@ -136,22 +133,14 @@ export function createBenchmarkCompareTool(
           portfolio: {
             netPerformancePercent:
               perf.netPerformancePercentage != null
-                ? Number(
-                    (perf.netPerformancePercentage * 100).toFixed(
-                      2
-                    )
-                  )
+                ? Number((perf.netPerformancePercentage * 100).toFixed(2))
                 : null,
             netPerformance: perf.netPerformance,
             currentNetWorth: perf.currentNetWorth ?? null,
             totalInvestment: perf.totalInvestment,
             annualizedPerformancePercent:
               perf.annualizedPerformancePercent != null
-                ? Number(
-                    (
-                      perf.annualizedPerformancePercent * 100
-                    ).toFixed(2)
-                  )
+                ? Number((perf.annualizedPerformancePercent * 100).toFixed(2))
                 : null,
             baseCurrency: context.baseCurrency
           },
@@ -163,15 +152,16 @@ export function createBenchmarkCompareTool(
             marketCondition: benchmark.marketCondition,
             performanceFromATH:
               (
-                benchmark.performances.allTimeHigh
-                  .performancePercent * 100
+                benchmark.performances.allTimeHigh.performancePercent * 100
               ).toFixed(2) + '%',
-            allTimeHighDate:
-              benchmark.performances.allTimeHigh.date,
+            allTimeHighDate: benchmark.performances.allTimeHigh.date,
             trend50d: benchmark.trend50d,
             trend200d: benchmark.trend200d
           },
-          retrievedAt: new Date().toISOString()
+          retrievedAt:
+            new Date().toLocaleString('en-US', {
+              timeZone: 'America/New_York'
+            }) + ' ET'
         };
 
         return JSON.stringify(result);

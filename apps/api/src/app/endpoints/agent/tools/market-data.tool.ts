@@ -39,15 +39,14 @@ export function createMarketDataTool(
           const symbol = rawSymbol.trim().toUpperCase();
 
           // Try database first (fast path for known symbols)
-          const profile =
-            await prismaService.symbolProfile.findFirst({
-              where: { symbol },
-              select: {
-                dataSource: true,
-                symbol: true,
-                name: true
-              }
-            });
+          const profile = await prismaService.symbolProfile.findFirst({
+            where: { symbol },
+            select: {
+              dataSource: true,
+              symbol: true,
+              name: true
+            }
+          });
 
           if (profile) {
             resolved.push({
@@ -66,8 +65,7 @@ export function createMarketDataTool(
             });
 
             const match = searchResult.items.find(
-              (item) =>
-                item.symbol.toUpperCase() === symbol
+              (item) => item.symbol.toUpperCase() === symbol
             );
 
             if (match) {
@@ -137,7 +135,10 @@ export function createMarketDataTool(
         const result = {
           quotes,
           errors: errors.length > 0 ? errors : undefined,
-          retrievedAt: new Date().toISOString()
+          retrievedAt:
+            new Date().toLocaleString('en-US', {
+              timeZone: 'America/New_York'
+            }) + ' ET'
         };
 
         return JSON.stringify(result);

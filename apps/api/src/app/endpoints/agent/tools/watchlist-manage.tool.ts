@@ -60,7 +60,10 @@ export function createWatchlistManageTool(
               allTimeHighDate: item.performances?.allTimeHigh?.date ?? null
             })),
             totalItems: items.length,
-            retrievedAt: new Date().toISOString()
+            retrievedAt:
+              new Date().toLocaleString('en-US', {
+                timeZone: 'America/New_York'
+              }) + ' ET'
           });
         }
 
@@ -130,7 +133,10 @@ export function createWatchlistManageTool(
             dataSource: String(dataSource),
             success: true,
             message: `${symbol} has been added to your watchlist.`,
-            retrievedAt: new Date().toISOString()
+            retrievedAt:
+              new Date().toLocaleString('en-US', {
+                timeZone: 'America/New_York'
+              }) + ' ET'
           });
         }
 
@@ -147,7 +153,10 @@ export function createWatchlistManageTool(
             dataSource: String(dataSource),
             success: true,
             message: `${symbol} has been removed from your watchlist.`,
-            retrievedAt: new Date().toISOString()
+            retrievedAt:
+              new Date().toLocaleString('en-US', {
+                timeZone: 'America/New_York'
+              }) + ' ET'
           });
         }
 

@@ -20,7 +20,9 @@ export function validateDataFreshness(
       continue;
     }
 
-    const retrievedTime = new Date(retrievedAt).getTime();
+    // Strip timezone label suffix (e.g., " ET") for parsing
+    const cleanTimestamp = retrievedAt.replace(/\s+[A-Z]{1,4}$/, '');
+    const retrievedTime = new Date(cleanTimestamp).getTime();
 
     if (isNaN(retrievedTime)) {
       continue;
