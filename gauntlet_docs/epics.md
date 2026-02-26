@@ -126,104 +126,113 @@ This document provides the complete epic and story breakdown for the Ghostfolio 
 
 ### FR Coverage Map
 
-| FR | Epic | Description |
-|---|---|---|
-| FR1 | Epic 1 | NL queries → contextual responses |
-| FR2 | Epic 2 | Multi-turn conversation context |
-| FR3 | Epic 1 | Auto tool selection |
-| FR4 | Epic 2 | Multi-tool chaining |
-| FR5 | Epic 1 | Multi-tool result synthesis |
-| FR6 | Epic 1 | Plain-language adaptive responses |
-| FR7 | Epic 1 | Ambiguous query handling |
-| FR8 | Epic 5 | Persistent conversation history (Redis) |
-| FR9 | Epic 1 | portfolio_analysis tool |
-| FR10 | Epic 2 | market_data tool |
-| FR11 | Epic 2 | benchmark_compare tool |
-| FR12 | Epic 6 | symbol_search tool |
-| FR13 | Epic 6 | watchlist_manage tool |
-| FR14 | Epic 1 | Structured results with attribution |
-| FR15 | Epic 1 | Real user data, not mocked |
-| FR16 | Epic 1 | Ticker symbol validation |
-| FR17 | Epic 5 | Numerical cross-check |
-| FR18 | Epic 5 | Data freshness flagging |
-| FR19 | Epic 5 | Confidence scoring |
-| FR20 | Epic 1 | Financial disclaimer |
-| FR21 | Epic 1 | Refuses guaranteed returns |
-| FR22 | Epic 1 | Refuses out-of-domain queries |
-| FR22a | Epic 1 | Graceful error messages |
-| FR23 | Epic 3 | Eval test harness |
-| FR24 | Epic 3 | Correctness validation |
-| FR25 | Epic 3 | Tool selection validation |
-| FR26 | Epic 3 | Safety validation |
-| FR27 | Epic 3 | Edge case validation |
-| FR28 | Epic 4 | Multi-step reasoning validation |
-| FR29 | Epic 4 | CI-integrated eval |
-| FR30 | Epic 3 | Eval case format (input, expected, criteria) |
-| FR31 | Epic 5 | Full LangSmith traces |
-| FR32 | Epic 5 | Latency tracking |
-| FR33 | Epic 5 | Token/cost tracking |
-| FR34 | Epic 5 | Error categorization |
-| FR35 | Epic 4 | Historical eval regression tracking |
-| FR36 | Epic 5 | Admin LangSmith dashboard |
-| FR37 | Epic 1 | JWT-only access |
-| FR38 | Epic 1 | User-scoped data |
-| FR39 | Epic 1 | Input sanitization |
-| FR40 | Epic 1 | System prompt boundaries |
-| FR41 | Epic 5 | No raw portfolio data in traces |
-| FR42 | Epic 7 | Chat interface |
-| FR43 | Epic 7 | Conversational display |
-| FR44 | Epic 7 | Loading state |
-| FR45 | Epic 7 | Error state |
-| FR45a | Epic 6 | Tool extensibility |
-| FR46 | Epic 1 | Environment variable configuration |
-| FR47 | Epic 1 | Docker deployment |
-| FR48 | Epic 3 | Railway deployment |
+| FR    | Epic   | Description                                  |
+| ----- | ------ | -------------------------------------------- |
+| FR1   | Epic 1 | NL queries → contextual responses            |
+| FR2   | Epic 2 | Multi-turn conversation context              |
+| FR3   | Epic 1 | Auto tool selection                          |
+| FR4   | Epic 2 | Multi-tool chaining                          |
+| FR5   | Epic 1 | Multi-tool result synthesis                  |
+| FR6   | Epic 1 | Plain-language adaptive responses            |
+| FR7   | Epic 1 | Ambiguous query handling                     |
+| FR8   | Epic 5 | Persistent conversation history (Redis)      |
+| FR9   | Epic 1 | portfolio_analysis tool                      |
+| FR10  | Epic 2 | market_data tool                             |
+| FR11  | Epic 2 | benchmark_compare tool                       |
+| FR12  | Epic 6 | symbol_search tool                           |
+| FR13  | Epic 6 | watchlist_manage tool                        |
+| FR14  | Epic 1 | Structured results with attribution          |
+| FR15  | Epic 1 | Real user data, not mocked                   |
+| FR16  | Epic 1 | Ticker symbol validation                     |
+| FR17  | Epic 5 | Numerical cross-check                        |
+| FR18  | Epic 5 | Data freshness flagging                      |
+| FR19  | Epic 5 | Confidence scoring                           |
+| FR20  | Epic 1 | Financial disclaimer                         |
+| FR21  | Epic 1 | Refuses guaranteed returns                   |
+| FR22  | Epic 1 | Refuses out-of-domain queries                |
+| FR22a | Epic 1 | Graceful error messages                      |
+| FR23  | Epic 3 | Eval test harness                            |
+| FR24  | Epic 3 | Correctness validation                       |
+| FR25  | Epic 3 | Tool selection validation                    |
+| FR26  | Epic 3 | Safety validation                            |
+| FR27  | Epic 3 | Edge case validation                         |
+| FR28  | Epic 4 | Multi-step reasoning validation              |
+| FR29  | Epic 4 | CI-integrated eval                           |
+| FR30  | Epic 3 | Eval case format (input, expected, criteria) |
+| FR31  | Epic 5 | Full LangSmith traces                        |
+| FR32  | Epic 5 | Latency tracking                             |
+| FR33  | Epic 5 | Token/cost tracking                          |
+| FR34  | Epic 5 | Error categorization                         |
+| FR35  | Epic 4 | Historical eval regression tracking          |
+| FR36  | Epic 5 | Admin LangSmith dashboard                    |
+| FR37  | Epic 1 | JWT-only access                              |
+| FR38  | Epic 1 | User-scoped data                             |
+| FR39  | Epic 1 | Input sanitization                           |
+| FR40  | Epic 1 | System prompt boundaries                     |
+| FR41  | Epic 5 | No raw portfolio data in traces              |
+| FR42  | Epic 7 | Chat interface                               |
+| FR43  | Epic 7 | Conversational display                       |
+| FR44  | Epic 7 | Loading state                                |
+| FR45  | Epic 7 | Error state                                  |
+| FR45a | Epic 6 | Tool extensibility                           |
+| FR46  | Epic 1 | Environment variable configuration           |
+| FR47  | Epic 1 | Docker deployment                            |
+| FR48  | Epic 3 | Railway deployment                           |
 
 ## Epic List
 
 ### Epic 1: Conversational Portfolio Intelligence (Foundation)
+
 Users can ask natural language questions about their portfolio and receive verified, accurate responses from an AI agent using their real Ghostfolio data. This is the sequential spine — everything else builds on it.
 **Deadline:** MVP (Tuesday)
 **Agent Teams:** NO — sequential by design
 **FRs covered:** FR1, FR3, FR5, FR6, FR7, FR9, FR14, FR15, FR16, FR20, FR21, FR22, FR22a, FR37, FR38, FR39, FR40, FR46, FR47
 
 ### Epic 2: Market Data & Benchmark Analysis (MVP Completion)
+
 Users can get current market prices and compare portfolio performance against benchmarks, including multi-tool queries and multi-turn conversations.
 **Deadline:** MVP (Tuesday)
 **Agent Teams:** YES — Teammate 1: market_data tool, Teammate 2: benchmark_compare tool, Lead: conversation memory + integration
 **FRs covered:** FR2, FR4, FR10, FR11
 
 ### Epic 3: MVP Quality Gate & Deployment
+
 The agent is publicly accessible, tested with 5+ eval cases, and deployed for evaluators.
 **Deadline:** MVP (Tuesday)
 **Agent Teams:** NO — tight deadline, sequential
 **FRs covered:** FR23, FR24, FR25, FR26, FR27, FR30, FR48
 
 ### Epic 4: Evaluation Rigor (Early Submission)
+
 Agent quality is systematically measured with 50+ test cases across 4 categories with CI integration.
 **Deadline:** Early Submission (Friday)
 **Agent Teams:** YES — Teammate 1: happy path (20+), Teammate 2: edge + adversarial (20+), Teammate 3: multi-step (10+), Lead: CI + reporting
 **FRs covered:** FR28, FR29, FR30 (expanded), FR35
 
 ### Epic 5: Advanced Verification & Observability (Early Submission)
+
 Users receive confidence-scored, cross-checked answers with freshness warnings. Administrators see full LangSmith traces. Conversations persist via Redis.
 **Deadline:** Early Submission (Friday)
 **Agent Teams:** Optional — 2 independent workstreams (verification + observability) but smaller scope
 **FRs covered:** FR8, FR17, FR18, FR19, FR31, FR32, FR33, FR34, FR36, FR41
 
 ### Epic 6: Extended Agent Capabilities (Final)
+
 Users can search for symbols and manage their watchlist through conversation.
 **Deadline:** Final (Sunday)
 **Agent Teams:** YES — Teammate 1: symbol_search, Teammate 2: watchlist_manage, Lead: registration + integration
 **FRs covered:** FR12, FR13, FR45a
 
-### Epic 7: Browser Chat Experience (Final)
+### Epic 7: Browser Chat Experience (Final) — COMPLETE
+
 Users can chat with the agent directly in Ghostfolio's web interface. LOWEST PRIORITY — skip if time-pressured (API demo acceptable per PRD).
 **Deadline:** Final (Sunday)
 **Agent Teams:** NO — single component
 **FRs covered:** FR42, FR43, FR44, FR45
+**Completed:** 2026-02-26 — Full chat UI at `/ai-agent` with permission gating, auto-focus, clickable example prompts, tool call visualization, verification alerts, error handling, loading states, markdown rendering, and accessibility (aria-labels, roles).
 
 ### Epic 8: Submission Deliverables (Final)
+
 Evaluators receive a complete submission package: cost analysis, architecture doc, open source contribution, demo video, and social post.
 **Deadline:** Final (Sunday) 10:59 PM CT
 **Agent Teams:** YES — Teammate 1: cost analysis, Teammate 2: architecture doc, Teammate 3: OSS + social post, Lead: demo coordination + packaging
@@ -600,6 +609,7 @@ So that I can submit with confidence.
 **Given** the deployed Railway URL
 **When** all 9 MVP requirements are checked against the live deployment
 **Then** all pass:
+
 1. NL finance queries → correct responses
 2. 3 functional tools execute
 3. Structured tool results
@@ -898,11 +908,11 @@ So that I can manage my market watch targets without navigating the dashboard.
 
 ---
 
-## Epic 7: Browser Chat Experience (Final)
+## Epic 7: Browser Chat Experience (Final) — COMPLETE
 
 Users can chat with the agent directly in Ghostfolio's web interface, with loading indicators and error states. **LOWEST PRIORITY** — skip if time-pressured. API demo is acceptable per PRD.
 
-### Story 7.1: Angular Chat Component
+### Story 7.1: Angular Chat Component — COMPLETE
 
 As a **user**,
 I want to chat with the agent directly in Ghostfolio's web interface instead of using API calls,

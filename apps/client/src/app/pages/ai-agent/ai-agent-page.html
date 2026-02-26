@@ -1,137 +1,171 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <div class="align-items-center d-flex justify-content-between mb-4">
-        <h1 class="d-none d-sm-block h3 mb-0" i18n>AI Agent</h1>
-        <button
-          mat-stroked-button
-          [disabled]="isLoading || messages.length === 0"
-          (click)="onNewConversation()"
-        >
-          <ion-icon class="mr-1" name="refresh-outline" />
-          <span i18n>New Conversation</span>
-        </button>
-      </div>
-
-      <div class="chat-container">
-        <div #messagesContainer class="messages-area">
-          @if (messages.length === 0 && !isLoading) {
-            <div class="empty-state">
-              <p class="mb-1" i18n>Ask me about your portfolio</p>
-              <p class="text-muted" i18n>
-                Try "What's in my portfolio?" or "How are my investments
-                performing?"
-              </p>
-            </div>
-          }
-          @for (message of messages; track message.timestamp) {
-            <div
-              class="message-row"
-              [ngClass]="{
-                'message-user': message.role === 'user',
-                'message-agent': message.role === 'agent'
-              }"
-            >
-              <div
-                class="message-bubble"
-                [ngClass]="{
-                  'bubble-user': message.role === 'user',
-                  'bubble-agent': message.role === 'agent',
-                  'bubble-error': message.error
-                }"
-              >
-                @if (message.role === 'agent' && !message.error) {
-                  <markdown [data]="message.content" />
-                } @else {
-                  <span class="whitespace-pre-wrap">{{ message.content }}</span>
-                }
-              </div>
-
-              @if (
-                message.verification?.length > 0 && message.role === 'agent'
-              ) {
-                @for (v of message.verification; track v.type + v.details) {
-                  @if (!v.passed) {
-                    <div
-                      class="verification-alert"
-                      [ngClass]="{
-                        'alert-warning': v.severity === 'warning',
-                        'alert-error': v.severity === 'error',
-                        'alert-info': v.severity === 'info'
-                      }"
-                    >
-                      <strong>{{ v.type }}:</strong> {{ v.details }}
-                    </div>
-                  }
-                }
-              }
-
-              @if (message.toolCalls?.length > 0 && message.role === 'agent') {
-                <mat-accordion>
-                  <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                      <mat-panel-title i18n
-                        >Tool Calls ({{
-                          message.toolCalls.length
-                        }})</mat-panel-title
-                      >
-                    </mat-expansion-panel-header>
-                    @for (tool of message.toolCalls; track tool.name) {
-                      <div class="tool-call">
-                        <div class="tool-name">{{ tool.name }}</div>
-                        <pre class="tool-json">{{ tool.input | json }}</pre>
-                      </div>
-                    }
-                  </mat-expansion-panel>
-                </mat-accordion>
-              }
-
-              @if (message.metadata && message.role === 'agent') {
-                <div class="message-metadata">
-                  {{ message.metadata.model }} &middot;
-                  {{ message.metadata.latencyMs }}ms
-                  @if (message.metadata.tokensUsed) {
-                    &middot; {{ message.metadata.tokensUsed }} tokens
-                  }
-                </div>
-              }
-            </div>
-          }
-          @if (isLoading) {
-            <div class="message-row message-agent">
-              <div class="loading-indicator">
-                <mat-spinner diameter="20" />
-                <span class="ml-2" i18n>Thinking...</span>
-              </div>
-            </div>
-          }
-        </div>
-
-        <div class="input-area">
-          <mat-form-field appearance="outline" class="w-100">
-            <textarea
-              cdkAutosizeMaxRows="5"
-              cdkAutosizeMinRows="1"
-              cdkTextareaAutosize
-              i18n-placeholder
-              matInput
-              placeholder="Type your message..."
-              [disabled]="isLoading"
-              [(ngModel)]="messageInput"
-              (keydown)="onKeyDown($event)"
-            ></textarea>
-          </mat-form-field>
+      @if (hasPermissionToAccessAgentChat) {
+        <div class="align-items-center d-flex justify-content-between mb-4">
+          <h1 class="d-none d-sm-block h3 mb-0" i18n>AI Agent</h1>
           <button
-            class="send-button"
-            color="primary"
-            mat-fab
-            [disabled]="!messageInput.trim() || isLoading"
-            (click)="onSendMessage()"
+            aria-label="Start a new conversation"
+            i18n-aria-label
+            mat-stroked-button
+            [disabled]="isLoading || messages.length === 0"
+            (click)="onNewConversation()"
           >
-            <ion-icon name="send-outline" />
+            <ion-icon class="mr-1" name="refresh-outline" />
+            <span i18n>New Conversation</span>
           </button>
         </div>
-      </div>
+
+        <div aria-live="polite" class="chat-container" role="log">
+          <div #messagesContainer class="messages-area">
+            @if (messages.length === 0 && !isLoading) {
+              <div class="empty-state">
+                <p class="mb-1" i18n>Ask me about your portfolio</p>
+                <p class="text-muted mb-3" i18n>
+                  Try one of these to get started:
+                </p>
+                <mat-chip-set aria-label="Example prompts" role="list">
+                  @for (prompt of examplePrompts; track prompt) {
+                    <mat-chip role="listitem" (click)="onExamplePrompt(prompt)">
+                      {{ prompt }}
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+            @for (message of messages; track message.timestamp) {
+              <div
+                class="message-row"
+                [ngClass]="{
+                  'message-user': message.role === 'user',
+                  'message-agent': message.role === 'agent'
+                }"
+              >
+                <div
+                  class="message-bubble"
+                  [ngClass]="{
+                    'bubble-user': message.role === 'user',
+                    'bubble-agent': message.role === 'agent',
+                    'bubble-error': message.error
+                  }"
+                >
+                  @if (message.role === 'agent' && !message.error) {
+                    <markdown [data]="message.content" />
+                  } @else {
+                    <span class="whitespace-pre-wrap">{{
+                      message.content
+                    }}</span>
+                  }
+                </div>
+
+                @if (
+                  message.verification?.length > 0 && message.role === 'agent'
+                ) {
+                  @for (v of message.verification; track v.type + v.details) {
+                    @if (!v.passed) {
+                      <div
+                        class="verification-alert"
+                        role="alert"
+                        [ngClass]="{
+                          'alert-warning': v.severity === 'warning',
+                          'alert-error': v.severity === 'error',
+                          'alert-info': v.severity === 'info'
+                        }"
+                      >
+                        <strong>{{ v.type }}:</strong> {{ v.details }}
+                      </div>
+                    }
+                  }
+                }
+
+                @if (
+                  message.toolCalls?.length > 0 && message.role === 'agent'
+                ) {
+                  <mat-accordion>
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title i18n
+                          >Tool Calls ({{
+                            message.toolCalls.length
+                          }})</mat-panel-title
+                        >
+                      </mat-expansion-panel-header>
+                      @for (tool of message.toolCalls; track tool.name) {
+                        <div class="tool-call">
+                          <div class="tool-name">{{ tool.name }}</div>
+                          <pre class="tool-json">{{ tool.input | json }}</pre>
+                        </div>
+                      }
+                    </mat-expansion-panel>
+                  </mat-accordion>
+                }
+
+                @if (message.metadata && message.role === 'agent') {
+                  <div class="message-metadata">
+                    {{ message.metadata.model }} &middot;
+                    {{ message.metadata.latencyMs }}ms
+                    @if (message.metadata.tokensUsed) {
+                      &middot; {{ message.metadata.tokensUsed }} tokens
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @if (isLoading) {
+              <div class="message-row message-agent">
+                <div
+                  aria-label="Processing your message"
+                  class="loading-indicator"
+                  role="status"
+                >
+                  <mat-spinner diameter="20" />
+                  <span class="ml-2" i18n>Thinking...</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="input-area">
+            <mat-form-field appearance="outline" class="w-100">
+              <textarea
+                #chatInput
+                aria-label="Chat message input"
+                cdkAutosizeMaxRows="5"
+                cdkAutosizeMinRows="1"
+                cdkTextareaAutosize
+                i18n-aria-label
+                i18n-placeholder
+                matInput
+                placeholder="Type your message..."
+                [disabled]="isLoading"
+                [(ngModel)]="messageInput"
+                (keydown)="onKeyDown($event)"
+              ></textarea>
+            </mat-form-field>
+            <button
+              aria-label="Send message"
+              class="send-button"
+              color="primary"
+              i18n-aria-label
+              mat-fab
+              [disabled]="!messageInput.trim() || isLoading"
+              (click)="onSendMessage()"
+            >
+              <ion-icon name="send-outline" />
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div
+          class="align-items-center d-flex flex-column justify-content-center py-5"
+        >
+          <h1 class="h3 mb-2" i18n>AI Agent</h1>
+          <p class="text-muted" i18n>
+            You do not have permission to access the AI Agent. Please contact
+            your administrator.
+          </p>
+        </div>
+      }
     </div>
   </div>
 </div>

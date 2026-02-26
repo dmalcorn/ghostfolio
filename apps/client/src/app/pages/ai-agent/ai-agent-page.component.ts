@@ -12,6 +12,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import {
   AfterViewChecked,
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -21,6 +22,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -50,6 +52,7 @@ interface ChatMessage {
     IonIcon,
     MarkdownModule,
     MatButtonModule,
+    MatChipsModule,
     MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
@@ -61,11 +64,18 @@ interface ChatMessage {
   templateUrl: './ai-agent-page.html'
 })
 export class GfAiAgentPageComponent
-  implements AfterViewChecked, OnDestroy, OnInit
+  implements AfterViewChecked, AfterViewInit, OnDestroy, OnInit
 {
+  @ViewChild('chatInput') private chatInput: ElementRef<HTMLTextAreaElement>;
   @ViewChild('messagesContainer') private messagesContainer: ElementRef;
 
   public conversationId: string;
+  public examplePrompts = [
+    $localize`What's in my portfolio?`,
+    $localize`How are my investments performing?`,
+    $localize`Am I well diversified?`,
+    $localize`Compare my portfolio to the S&P 500`
+  ];
   public hasPermissionToAccessAgentChat: boolean;
   public isLoading = false;
   public messageInput = '';
@@ -105,6 +115,15 @@ export class GfAiAgentPageComponent
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
     }
+  }
+
+  public ngAfterViewInit() {
+    this.chatInput?.nativeElement?.focus();
+  }
+
+  public onExamplePrompt(prompt: string) {
+    this.messageInput = prompt;
+    this.onSendMessage();
   }
 
   public onKeyDown(event: KeyboardEvent) {

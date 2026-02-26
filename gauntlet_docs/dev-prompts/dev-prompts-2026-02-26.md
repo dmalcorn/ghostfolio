@@ -47,3 +47,33 @@
 - `apps/api/src/app/endpoints/agent/observability/error-categorizer.ts` + `.spec.ts` (created)
 
 ---
+
+### Prompt 3 — Epic 7: Browser Chat Experience
+
+**User:** Requested implementation of Epic 7 (Browser Chat Experience — Final deadline).
+**Agent:** Audited existing implementation against Story 7.1 acceptance criteria (FR42–FR45). Found the chat page was already substantially built from prior epics. All core acceptance criteria were already met:
+
+- Chat interface with text input and message history (FR42)
+- Conversational display via `POST /api/v1/agent/chat` (FR43)
+- Loading indicator ("Thinking..." spinner) renders synchronously before API call (FR44, NFR4)
+- Error states with HTTP status-specific messages (FR45)
+- Follows Ghostfolio patterns (standalone component, `gf-` prefix, lazy-loaded route, AuthGuard)
+
+Added polish improvements:
+
+- **Permission gating in template** — shows "no permission" message for users without `accessAgentChat` (previously rendered full UI even if API would reject)
+- **Clickable example prompt chips** — replaced static "Try X or Y" text with Material Chips that auto-send when clicked
+- **Auto-focus** — textarea receives focus on page load via `AfterViewInit`
+- **Accessibility** — added `aria-label` on send button, new conversation button, textarea, loading indicator (`role="status"`), chat container (`role="log"`, `aria-live="polite"`), verification alerts (`role="alert"`)
+- **MatChipsModule** added to component imports
+
+Production build passed successfully. Updated epics.md to mark Epic 7 as COMPLETE.
+
+**Artifacts:**
+
+- `apps/client/src/app/pages/ai-agent/ai-agent-page.component.ts` (modified)
+- `apps/client/src/app/pages/ai-agent/ai-agent-page.html` (modified)
+- `apps/client/src/app/pages/ai-agent/ai-agent-page.scss` (modified)
+- `gauntlet_docs/epics.md` (modified — Epic 7 marked COMPLETE)
+
+---
