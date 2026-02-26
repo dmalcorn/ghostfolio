@@ -82,6 +82,7 @@ export class GfAiAgentPageComponent
   public messages: ChatMessage[] = [];
   public user: User;
 
+  private shouldFocusInput = false;
   private shouldScrollToBottom = false;
   private unsubscribeSubject = new Subject<void>();
 
@@ -105,12 +106,18 @@ export class GfAiAgentPageComponent
             permissions.accessAgentChat
           );
 
+          this.shouldFocusInput = true;
           this.changeDetectorRef.markForCheck();
         }
       });
   }
 
   public ngAfterViewChecked() {
+    if (this.shouldFocusInput) {
+      this.chatInput?.nativeElement?.focus();
+      this.shouldFocusInput = false;
+    }
+
     if (this.shouldScrollToBottom) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
@@ -118,7 +125,7 @@ export class GfAiAgentPageComponent
   }
 
   public ngAfterViewInit() {
-    this.chatInput?.nativeElement?.focus();
+    this.shouldFocusInput = true;
   }
 
   public onExamplePrompt(prompt: string) {
@@ -136,6 +143,7 @@ export class GfAiAgentPageComponent
   public onNewConversation() {
     this.conversationId = undefined;
     this.messages = [];
+    this.shouldFocusInput = true;
   }
 
   public onSendMessage() {
@@ -182,6 +190,7 @@ export class GfAiAgentPageComponent
           });
 
           this.isLoading = false;
+          this.shouldFocusInput = true;
           this.shouldScrollToBottom = true;
           this.changeDetectorRef.markForCheck();
         },
@@ -198,6 +207,7 @@ export class GfAiAgentPageComponent
           });
 
           this.isLoading = false;
+          this.shouldFocusInput = true;
           this.shouldScrollToBottom = true;
           this.changeDetectorRef.markForCheck();
         }
