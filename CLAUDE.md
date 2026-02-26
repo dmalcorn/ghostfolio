@@ -137,6 +137,14 @@ Framework-agnostic shared code used by both API and client:
 - **pre-commit**: Runs `affected:lint` (against main) and `format:check` on uncommitted files
 - **pre-push**: Runs `scripts/ci-local.sh` — full pipeline: lint, format check, test, production build
 
+**IMPORTANT — Node.js Heap Size:** The Nx linter triggered by the pre-commit hook will run out of memory (OOM) with the default heap size. **Always** set `NODE_OPTIONS` before running `git commit`:
+
+```bash
+NODE_OPTIONS="--max-old-space-size=8192" git commit -m "your message"
+```
+
+If the pre-commit hook fails with `Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`, this is the fix. Apply it on the first attempt — do not waste a round-trip discovering the OOM error.
+
 ## AgentForge Project Context
 
 This Ghostfolio fork is being extended with an AI agent for the **AgentForge** training project (Gauntlet AI, Week 2). Key project documents live in `gauntlet_docs/`.

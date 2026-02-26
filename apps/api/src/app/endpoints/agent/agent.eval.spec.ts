@@ -179,6 +179,12 @@ const mockDataProviderService = {
   })
 };
 
+const mockRedisCacheService = {
+  get: jest.fn().mockResolvedValue(null),
+  set: jest.fn().mockResolvedValue(undefined),
+  remove: jest.fn().mockResolvedValue(undefined)
+};
+
 const mockPrismaService = {
   symbolProfile: {
     findFirst: jest.fn().mockImplementation(({ where }) => {
@@ -336,7 +342,8 @@ describeIfApiKey('Agent Evaluation Suite', () => {
       mockBenchmarkService as any,
       mockDataProviderService as any,
       mockPortfolioService as any,
-      mockPrismaService as any
+      mockPrismaService as any,
+      mockRedisCacheService as any
     );
   });
 

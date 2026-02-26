@@ -23,4 +23,14 @@ export interface AgentChatMetadata {
   model: string;
   tokensUsed: number;
   latencyMs: number;
+  confidenceScore?: number;
+  latencyBreakdown?: {
+    llmMs: number;
+    toolMs: number;
+    verificationMs: number;
+  };
+  tokenDetail?: {
+    inputTokens: number;
+    outputTokens: number;
+  };
 }

@@ -31,6 +31,16 @@ export interface AgentMetadata {
   model: string;
   tokensUsed: number;
   latencyMs: number;
+  confidenceScore?: number;
+  latencyBreakdown?: {
+    llmMs: number;
+    toolMs: number;
+    verificationMs: number;
+  };
+  tokenDetail?: {
+    inputTokens: number;
+    outputTokens: number;
+  };
 }
 
 export interface ChatRequestDto {

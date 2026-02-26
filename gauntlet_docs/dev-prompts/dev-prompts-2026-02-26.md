@@ -19,3 +19,31 @@
 - `apps/api/src/app/endpoints/agent/agent.eval.spec.ts` (modified)
 
 ---
+
+### Prompt 2 — Epic 5: Advanced Verification & Observability
+
+**User:** Requested analysis of Epic 5 and whether Agent Teams are appropriate, then approved sequential implementation.
+**Agent:** Analyzed Epic 5 (4 stories) and recommended against Agent Teams due to tight coupling between verification stories, shared file conflicts, small scope, and Friday deadline risk. Implemented all 4 stories sequentially:
+
+- **Story 5.1:** Replaced in-memory conversation Map with Redis persistence via `RedisCacheService`. Uses LangChain's `mapChatMessagesToStoredMessages`/`mapStoredMessagesToChatMessages` for serialization. 24h TTL. Graceful degradation on Redis failures.
+- **Story 5.2:** Added `validateNumericalCrosscheck()` — checks portfolio allocation sums to ~100% (2% tolerance), detects disproportionate benchmark annualized vs net performance ratios (>10x).
+- **Story 5.3:** Added `validateDataFreshness()` — flags equities >24h stale, crypto >1h stale. Added `calculateConfidenceScore()` — starts at 100, deducts for no tools (-40), failed verifications (-15/-25), tool errors (-20). Score <70 triggers warning. Added `confidenceScore` to `AgentMetadata`.
+- **Story 5.4:** Added token tracking (`extractTokenUsage`/`accumulateTokenUsage`), latency breakdown (llmMs/toolMs/verificationMs), error categorization, trace sanitization (redacts quantities/balances/investments from LangSmith traces). Wrapped `chat()` with `traceable()` from `langsmith/traceable` for LangSmith integration with `processInputs`/`processOutputs` sanitization.
+
+60 unit tests across 7 test suites, all passing. Eval harness self-tests (9/9) confirmed no regressions.
+
+**Artifacts:**
+
+- `apps/api/src/app/endpoints/agent/agent.service.ts` (modified — Redis, verification pipeline, traceable wrapper, token/latency tracking)
+- `apps/api/src/app/endpoints/agent/agent.eval.spec.ts` (modified — added RedisCacheService mock)
+- `apps/api/src/app/endpoints/agent/interfaces/agent.interfaces.ts` (modified — confidenceScore, latencyBreakdown, tokenDetail)
+- `libs/common/src/lib/interfaces/responses/agent-chat-response.interface.ts` (modified — mirror)
+- `apps/api/src/app/endpoints/agent/conversation-persistence.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/verification/numerical-crosscheck.ts` + `.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/verification/data-freshness.ts` + `.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/verification/confidence-scoring.ts` + `.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/observability/token-tracker.ts` + `.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/observability/trace-sanitizer.ts` + `.spec.ts` (created)
+- `apps/api/src/app/endpoints/agent/observability/error-categorizer.ts` + `.spec.ts` (created)
+
+---

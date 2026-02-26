@@ -1,4 +1,5 @@
 import { PortfolioService } from '@ghostfolio/api/app/portfolio/portfolio.service';
+import { RedisCacheService } from '@ghostfolio/api/app/redis-cache/redis-cache.service';
 import { BenchmarkService } from '@ghostfolio/api/services/benchmark/benchmark.service';
 import { DataProviderService } from '@ghostfolio/api/services/data-provider/data-provider.service';
 import { PrismaService } from '@ghostfolio/api/services/prisma/prisma.service';
@@ -8,12 +9,16 @@ import {
   AIMessage,
   BaseMessage,
   HumanMessage,
+  StoredMessage,
   SystemMessage,
-  ToolMessage
+  ToolMessage,
+  mapChatMessagesToStoredMessages,
+  mapStoredMessagesToChatMessages
 } from '@langchain/core/messages';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { Injectable, Logger } from '@nestjs/common';
+import { traceable } from 'langsmith/traceable';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -21,10 +26,20 @@ import {
   ToolCallRecord,
   ToolContext
 } from './interfaces/agent.interfaces';
+import { categorizeError } from './observability/error-categorizer';
+import {
+  TokenUsage,
+  accumulateTokenUsage,
+  extractTokenUsage
+} from './observability/token-tracker';
+import { sanitizeToolCallsForTrace } from './observability/trace-sanitizer';
 import { getSystemPrompt } from './prompts/system-prompt';
 import { createBenchmarkCompareTool } from './tools/benchmark-compare.tool';
 import { createMarketDataTool } from './tools/market-data.tool';
 import { createPortfolioAnalysisTool } from './tools/portfolio-analysis.tool';
+import { calculateConfidenceScore } from './verification/confidence-scoring';
+import { validateDataFreshness } from './verification/data-freshness';
+import { validateNumericalCrosscheck } from './verification/numerical-crosscheck';
 import { validateTickerSymbols } from './verification/ticker-validation';
 import { VerificationResult } from './verification/verification.interfaces';
 
@@ -32,21 +47,59 @@ const MAX_ITERATIONS = 5;
 
 @Injectable()
 export class AgentService {
-  private readonly logger = new Logger(AgentService.name);
+  private static readonly CONVERSATION_TTL_MS = 86_400_000; // 24 hours
 
-  private conversations = new Map<
-    string,
-    { messages: (HumanMessage | AIMessage)[] }
-  >();
+  private readonly logger = new Logger(AgentService.name);
 
   public constructor(
     private readonly benchmarkService: BenchmarkService,
     private readonly dataProviderService: DataProviderService,
     private readonly portfolioService: PortfolioService,
-    private readonly prismaService: PrismaService
+    private readonly prismaService: PrismaService,
+    private readonly redisCacheService: RedisCacheService
   ) {}
 
   public async chat(
+    message: string,
+    conversationId: string | undefined,
+    user: UserWithSettings
+  ): Promise<AgentResponse> {
+    const traceableChat = traceable(
+      async (msg: string, convId: string | undefined) => {
+        return this.executeChatPipeline(msg, convId, user);
+      },
+      {
+        name: 'agent_chat',
+        run_type: 'chain',
+        tags: ['ghostfolio-agent'],
+        metadata: {
+          userId: user.id,
+          baseCurrency: user.settings?.settings?.baseCurrency ?? 'USD'
+        },
+        processInputs: (inputs) => {
+          return { message: inputs.args?.[0] ?? '' };
+        },
+        processOutputs: (outputs) => {
+          const result = outputs.outputs ?? outputs;
+
+          if (result && typeof result === 'object' && 'toolCalls' in result) {
+            return {
+              ...result,
+              toolCalls: sanitizeToolCallsForTrace(
+                (result as AgentResponse).toolCalls
+              )
+            };
+          }
+
+          return result;
+        }
+      }
+    );
+
+    return traceableChat(message, conversationId);
+  }
+
+  private async executeChatPipeline(
     message: string,
     conversationId: string | undefined,
     user: UserWithSettings
@@ -73,7 +126,9 @@ export class AgentService {
 
     const modelWithTools = model.bindTools(tools);
 
-    const chatHistory = this.getConversationHistory(resolvedConversationId);
+    const chatHistory = await this.getConversationHistory(
+      resolvedConversationId
+    );
 
     const messages: BaseMessage[] = [
       new SystemMessage(getSystemPrompt(baseCurrency)),
@@ -82,18 +137,30 @@ export class AgentService {
     ];
 
     const toolCallRecords: ToolCallRecord[] = [];
+    const timing = { llmMs: 0, toolMs: 0 };
 
     let finalResponse: string;
+    let tokenUsage: TokenUsage = {
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0
+    };
 
     try {
-      finalResponse = await this.runToolCallingLoop(
+      const result = await this.runToolCallingLoop(
         modelWithTools,
         messages,
         tools,
-        toolCallRecords
+        toolCallRecords,
+        timing
       );
+
+      finalResponse = result.content;
+      tokenUsage = result.tokenUsage;
     } catch (error) {
-      this.logger.error('Agent execution failed', error);
+      const errorCategory = categorizeError(error);
+
+      this.logger.error(`Agent execution failed [${errorCategory}]`, error);
 
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -126,8 +193,7 @@ export class AgentService {
         verification: [],
         metadata: {
           model:
-            process.env.OPENROUTER_AGENT_MODEL ??
-            'anthropic/claude-sonnet-4',
+            process.env.OPENROUTER_AGENT_MODEL ?? 'anthropic/claude-sonnet-4',
           tokensUsed: 0,
           latencyMs
         }
@@ -135,9 +201,32 @@ export class AgentService {
     }
 
     // Run verification pipeline
+    const verificationStart = Date.now();
     const verification = this.runVerification(finalResponse, toolCallRecords);
+    const verificationMs = Date.now() - verificationStart;
 
-    this.saveConversationHistory(
+    // Compute confidence score based on all verifications
+    const hasToolErrors = toolCallRecords.some((tc) => {
+      const output = tc.output as Record<string, unknown>;
+
+      return output?.error === true;
+    });
+
+    const { score: confidenceScore, verificationResult: confidenceResult } =
+      calculateConfidenceScore({
+        toolCallCount: toolCallRecords.length,
+        verificationResults: verification,
+        hasToolErrors,
+        dataRetrievedCount: toolCallRecords.filter((tc) => {
+          const output = tc.output as Record<string, unknown>;
+
+          return output?.error !== true;
+        }).length
+      });
+
+    verification.push(confidenceResult);
+
+    await this.saveConversationHistory(
       resolvedConversationId,
       message,
       finalResponse
@@ -152,10 +241,19 @@ export class AgentService {
       verification,
       metadata: {
         model:
-          process.env.OPENROUTER_AGENT_MODEL ??
-          'anthropic/claude-sonnet-4',
-        tokensUsed: 0,
-        latencyMs
+          process.env.OPENROUTER_AGENT_MODEL ?? 'anthropic/claude-sonnet-4',
+        tokensUsed: tokenUsage.totalTokens,
+        latencyMs,
+        confidenceScore,
+        latencyBreakdown: {
+          llmMs: timing.llmMs,
+          toolMs: timing.toolMs,
+          verificationMs
+        },
+        tokenDetail: {
+          inputTokens: tokenUsage.inputTokens,
+          outputTokens: tokenUsage.outputTokens
+        }
       }
     };
   }
@@ -164,12 +262,26 @@ export class AgentService {
     model: ReturnType<ChatOpenAI['bindTools']>,
     messages: BaseMessage[],
     tools: DynamicStructuredTool[],
-    toolCallRecords: ToolCallRecord[]
-  ): Promise<string> {
+    toolCallRecords: ToolCallRecord[],
+    timing: { llmMs: number; toolMs: number }
+  ): Promise<{ content: string; tokenUsage: TokenUsage }> {
     const toolMap = new Map(tools.map((t) => [t.name, t]));
+    let totalTokens: TokenUsage = {
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0
+    };
 
     for (let i = 0; i < MAX_ITERATIONS; i++) {
+      const llmStart = Date.now();
       const response = await model.invoke(messages);
+
+      timing.llmMs += Date.now() - llmStart;
+
+      totalTokens = accumulateTokenUsage(
+        totalTokens,
+        extractTokenUsage(response)
+      );
 
       messages.push(response);
 
@@ -177,9 +289,12 @@ export class AgentService {
 
       if (toolCalls.length === 0) {
         // No tool calls — return the text response
-        return typeof response.content === 'string'
-          ? response.content
-          : JSON.stringify(response.content);
+        const content =
+          typeof response.content === 'string'
+            ? response.content
+            : JSON.stringify(response.content);
+
+        return { content, tokenUsage: totalTokens };
       }
 
       // Execute each tool call
@@ -202,7 +317,10 @@ export class AgentService {
           continue;
         }
 
+        const toolStart = Date.now();
         const result = await tool.invoke(toolCall.args);
+
+        timing.toolMs += Date.now() - toolStart;
 
         toolCallRecords.push({
           name: toolCall.name,
@@ -220,11 +338,22 @@ export class AgentService {
     }
 
     // If we exhausted iterations, get a final response without tools
+    const llmStart = Date.now();
     const finalResponse = await model.invoke(messages);
 
-    return typeof finalResponse.content === 'string'
-      ? finalResponse.content
-      : JSON.stringify(finalResponse.content);
+    timing.llmMs += Date.now() - llmStart;
+
+    totalTokens = accumulateTokenUsage(
+      totalTokens,
+      extractTokenUsage(finalResponse)
+    );
+
+    const content =
+      typeof finalResponse.content === 'string'
+        ? finalResponse.content
+        : JSON.stringify(finalResponse.content);
+
+    return { content, tokenUsage: totalTokens };
   }
 
   private createTools(context: ToolContext): DynamicStructuredTool[] {
@@ -246,8 +375,7 @@ export class AgentService {
 
   private createModel(): ChatOpenAI {
     const modelName =
-      process.env.OPENROUTER_AGENT_MODEL ??
-      'anthropic/claude-sonnet-4';
+      process.env.OPENROUTER_AGENT_MODEL ?? 'anthropic/claude-sonnet-4';
 
     return new ChatOpenAI({
       modelName,
@@ -278,27 +406,76 @@ export class AgentService {
       });
     }
 
+    try {
+      results.push(validateNumericalCrosscheck(response, toolCalls));
+    } catch (error) {
+      this.logger.warn('Numerical crosscheck failed', error);
+      results.push({
+        type: 'numerical_crosscheck',
+        passed: false,
+        details: 'Numerical verification could not be completed.',
+        severity: 'warning'
+      });
+    }
+
+    try {
+      results.push(validateDataFreshness(response, toolCalls));
+    } catch (error) {
+      this.logger.warn('Data freshness check failed', error);
+      results.push({
+        type: 'data_freshness',
+        passed: false,
+        details: 'Data freshness check could not be completed.',
+        severity: 'warning'
+      });
+    }
+
     return results;
   }
 
-  private getConversationHistory(
+  private async getConversationHistory(
     conversationId: string
-  ): (HumanMessage | AIMessage)[] {
-    return this.conversations.get(conversationId)?.messages ?? [];
+  ): Promise<BaseMessage[]> {
+    try {
+      const key = `agent:conversation:${conversationId}`;
+      const stored = await this.redisCacheService.get(key);
+
+      if (!stored) {
+        return [];
+      }
+
+      const parsed: StoredMessage[] = JSON.parse(stored);
+
+      return mapStoredMessagesToChatMessages(parsed);
+    } catch (error) {
+      this.logger.warn(`Failed to load conversation ${conversationId}`, error);
+
+      return [];
+    }
   }
 
-  private saveConversationHistory(
+  private async saveConversationHistory(
     conversationId: string,
     userMessage: string,
     assistantMessage: string
-  ): void {
-    const existing = this.conversations.get(conversationId);
-    const messages = existing?.messages ?? [];
+  ): Promise<void> {
+    try {
+      const key = `agent:conversation:${conversationId}`;
+      const existing = await this.getConversationHistory(conversationId);
 
-    messages.push(new HumanMessage(userMessage));
-    messages.push(new AIMessage(assistantMessage));
+      existing.push(new HumanMessage(userMessage));
+      existing.push(new AIMessage(assistantMessage));
 
-    this.conversations.set(conversationId, { messages });
+      const storedMessages = mapChatMessagesToStoredMessages(existing);
+
+      await this.redisCacheService.set(
+        key,
+        JSON.stringify(storedMessages),
+        AgentService.CONVERSATION_TTL_MS
+      );
+    } catch (error) {
+      this.logger.warn(`Failed to save conversation ${conversationId}`, error);
+    }
   }
 
   private safeParseJson(text: string): object {
