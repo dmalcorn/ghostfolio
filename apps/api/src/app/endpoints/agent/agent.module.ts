@@ -1,5 +1,6 @@
 import { AccountBalanceService } from '@ghostfolio/api/app/account-balance/account-balance.service';
 import { AccountService } from '@ghostfolio/api/app/account/account.service';
+import { WatchlistService } from '@ghostfolio/api/app/endpoints/watchlist/watchlist.service';
 import { OrderModule } from '@ghostfolio/api/app/order/order.module';
 import { PortfolioCalculatorFactory } from '@ghostfolio/api/app/portfolio/calculator/portfolio-calculator.factory';
 import { CurrentRateService } from '@ghostfolio/api/app/portfolio/current-rate.service';
@@ -18,6 +19,7 @@ import { MarketDataModule } from '@ghostfolio/api/services/market-data/market-da
 import { MarketDataService } from '@ghostfolio/api/services/market-data/market-data.service';
 import { PrismaModule } from '@ghostfolio/api/services/prisma/prisma.module';
 import { PropertyModule } from '@ghostfolio/api/services/property/property.module';
+import { DataGatheringModule } from '@ghostfolio/api/services/queues/data-gathering/data-gathering.module';
 import { PortfolioSnapshotQueueModule } from '@ghostfolio/api/services/queues/portfolio-snapshot/portfolio-snapshot.module';
 import { SymbolProfileModule } from '@ghostfolio/api/services/symbol-profile/symbol-profile.module';
 
@@ -32,6 +34,7 @@ import { AgentService } from './agent.service';
     ApiModule,
     BenchmarkModule,
     ConfigurationModule,
+    DataGatheringModule,
     DataProviderModule,
     ExchangeRateDataModule,
     I18nModule,
@@ -53,7 +56,8 @@ import { AgentService } from './agent.service';
     MarketDataService,
     PortfolioCalculatorFactory,
     PortfolioService,
-    RulesService
+    RulesService,
+    WatchlistService
   ]
 })
 export class AgentModule {}

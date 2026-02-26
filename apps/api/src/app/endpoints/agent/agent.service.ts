@@ -1,3 +1,4 @@
+import { WatchlistService } from '@ghostfolio/api/app/endpoints/watchlist/watchlist.service';
 import { PortfolioService } from '@ghostfolio/api/app/portfolio/portfolio.service';
 import { RedisCacheService } from '@ghostfolio/api/app/redis-cache/redis-cache.service';
 import { BenchmarkService } from '@ghostfolio/api/services/benchmark/benchmark.service';
@@ -37,6 +38,8 @@ import { getSystemPrompt } from './prompts/system-prompt';
 import { createBenchmarkCompareTool } from './tools/benchmark-compare.tool';
 import { createMarketDataTool } from './tools/market-data.tool';
 import { createPortfolioAnalysisTool } from './tools/portfolio-analysis.tool';
+import { createSymbolSearchTool } from './tools/symbol-search.tool';
+import { createWatchlistManageTool } from './tools/watchlist-manage.tool';
 import { calculateConfidenceScore } from './verification/confidence-scoring';
 import { validateDataFreshness } from './verification/data-freshness';
 import { validateNumericalCrosscheck } from './verification/numerical-crosscheck';
@@ -56,7 +59,8 @@ export class AgentService {
     private readonly dataProviderService: DataProviderService,
     private readonly portfolioService: PortfolioService,
     private readonly prismaService: PrismaService,
-    private readonly redisCacheService: RedisCacheService
+    private readonly redisCacheService: RedisCacheService,
+    private readonly watchlistService: WatchlistService
   ) {}
 
   public async chat(
@@ -369,6 +373,12 @@ export class AgentService {
         this.benchmarkService,
         this.dataProviderService,
         this.portfolioService
+      ),
+      createSymbolSearchTool(context, this.dataProviderService),
+      createWatchlistManageTool(
+        context,
+        this.watchlistService,
+        this.dataProviderService
       )
     ];
   }
