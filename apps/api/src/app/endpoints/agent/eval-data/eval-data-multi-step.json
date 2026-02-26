@@ -1,0 +1,224 @@
+{
+  "description": "Multi-step reasoning eval test cases — queries requiring 2+ tool chains for complex analytical responses (FR28).",
+  "version": "1.0.0",
+  "testCases": [
+    {
+      "id": "ms-001",
+      "category": "multi_step",
+      "description": "Portfolio holdings and VT current price",
+      "input": "Show me my portfolio holdings and also the current market price of VT",
+      "expectedToolCalls": ["portfolio_analysis", "market_data"],
+      "expectedOutputPatterns": ["VT", "portfolio"],
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-002",
+      "category": "multi_step",
+      "description": "Portfolio value and S&P 500 comparison",
+      "input": "What's my portfolio worth and how does it compare to the S&P 500?",
+      "expectedToolCalls": ["portfolio_analysis", "benchmark_compare"],
+      "expectedOutputPatterns": ["portfolio", "SPY", "S&P"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-003",
+      "category": "multi_step",
+      "description": "Market prices for VT and AMZN plus portfolio allocation",
+      "input": "Get me the current prices of VT and AMZN and show my portfolio allocation",
+      "expectedToolCalls": ["portfolio_analysis", "market_data"],
+      "expectedOutputPatterns": ["VT", "AMZN", "allocat"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-004",
+      "category": "multi_step",
+      "description": "VT in portfolio vs VT market price comparison",
+      "input": "How is VT performing in my portfolio compared to its current market price?",
+      "expectedToolCalls": ["portfolio_analysis", "market_data"],
+      "expectedOutputPatterns": ["VT", "portfolio", "price", "market"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-005",
+      "category": "multi_step",
+      "description": "List benchmarks and show holdings",
+      "input": "List the available benchmarks and show me all my holdings",
+      "expectedToolCalls": ["portfolio_analysis", "benchmark_compare"],
+      "expectedOutputPatterns": ["VT", "AMZN", "benchmark", "SPY", "holding"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-006",
+      "category": "multi_step",
+      "description": "SPY price and portfolio benchmark comparison",
+      "input": "What's the current price of SPY and how does my portfolio compare to it as a benchmark?",
+      "expectedToolCalls": ["market_data", "benchmark_compare"],
+      "expectedOutputPatterns": [
+        "SPY",
+        "price",
+        "compare",
+        "portfolio",
+        "benchmark"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-007",
+      "category": "multi_step",
+      "description": "Complete overview using all 3 tools",
+      "input": "Give me a complete overview: my portfolio holdings, the current price of VT, and how I compare to the S&P 500 benchmark",
+      "expectedToolCalls": [
+        "portfolio_analysis",
+        "market_data",
+        "benchmark_compare"
+      ],
+      "expectedOutputPatterns": ["VT", "portfolio", "SPY", "S&P"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-008",
+      "category": "multi_step",
+      "description": "Net worth, AMZN price, and Bitcoin benchmark",
+      "input": "I want to know my net worth, the current price of AMZN, and how my portfolio compares to Bitcoin",
+      "expectedToolCalls": [
+        "portfolio_analysis",
+        "market_data",
+        "benchmark_compare"
+      ],
+      "expectedOutputPatterns": [
+        "AMZN",
+        "portfolio",
+        "BTC",
+        "bitcoin",
+        "net worth"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-009",
+      "category": "multi_step",
+      "description": "VT allocation and current trading price",
+      "input": "How much of my portfolio is in VT and what is VT currently trading at?",
+      "expectedToolCalls": ["portfolio_analysis", "market_data"],
+      "expectedOutputPatterns": ["VT", "85", "%", "108", "price", "allocat"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-010",
+      "category": "multi_step",
+      "description": "AMZN in portfolio and in market",
+      "input": "Tell me about AMZN - both how it's doing in my portfolio and its current market price",
+      "expectedToolCalls": ["portfolio_analysis", "market_data"],
+      "expectedOutputPatterns": ["AMZN", "portfolio", "191", "price", "market"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-011",
+      "category": "multi_step",
+      "description": "Best holding and benchmark comparison",
+      "input": "What is my best performing holding and how do all the benchmarks look?",
+      "expectedToolCalls": ["portfolio_analysis", "benchmark_compare"],
+      "expectedOutputPatterns": [
+        "VT",
+        "benchmark",
+        "SPY",
+        "BTC",
+        "best",
+        "perform"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    },
+    {
+      "id": "ms-012",
+      "category": "multi_step",
+      "description": "Benchmark comparison and SPY market price",
+      "input": "Compare my portfolio to the S&P 500 and also tell me the current SPY price",
+      "expectedToolCalls": ["benchmark_compare", "market_data"],
+      "expectedOutputPatterns": ["SPY", "compare", "price", "598", "portfolio"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 45000
+    }
+  ]
+}

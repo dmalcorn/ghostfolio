@@ -1,5 +1,9 @@
 import * as testData from './agent.eval-data.json';
 import { AgentService } from './agent.service';
+import * as adversarialData from './eval-data/eval-data-adversarial.json';
+import * as edgeCaseData from './eval-data/eval-data-edge-case.json';
+import * as happyPathData from './eval-data/eval-data-happy-path.json';
+import * as multiStepData from './eval-data/eval-data-multi-step.json';
 import { AgentResponse, ToolCallRecord } from './interfaces/agent.interfaces';
 
 // ─── Mock Services ──────────────────────────────────────────────────────────
@@ -295,6 +299,28 @@ function checkUnexpectedPatterns(
   return !patterns.some((p) => lower.includes(p.toLowerCase()));
 }
 
+// ─── Eval Data Loader ───────────────────────────────────────────────────────
+
+function loadAllEvalCases(): EvalTestCase[] {
+  const allCases: EvalTestCase[] = [
+    ...(testData as any).testCases,
+    ...(happyPathData as any).testCases,
+    ...(edgeCaseData as any).testCases,
+    ...(adversarialData as any).testCases,
+    ...(multiStepData as any).testCases
+  ];
+
+  // Validate no duplicate IDs
+  const ids = allCases.map((c) => c.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+
+  if (dupes.length > 0) {
+    throw new Error(`Duplicate eval case IDs: ${dupes.join(', ')}`);
+  }
+
+  return allCases;
+}
+
 // ─── Test Suite ─────────────────────────────────────────────────────────────
 
 const HAS_API_KEY = Boolean(process.env.OPENROUTER_API_KEY);
@@ -318,18 +344,46 @@ describeIfApiKey('Agent Evaluation Suite', () => {
     // Print eval summary
     const total = evalResults.length;
     const passed = evalResults.filter((r) => r.passed).length;
+    const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : '0';
 
-    console.log('\n╔══════════════════════════════════════════════╗');
-    console.log('║         EVAL SUITE RESULTS SUMMARY           ║');
-    console.log('╠══════════════════════════════════════════════╣');
-    console.log(`║  Total:  ${total}                                  ║`);
+    console.log('\n╔══════════════════════════════════════════════════╗');
+    console.log('║           EVAL SUITE RESULTS SUMMARY             ║');
+    console.log('╠══════════════════════════════════════════════════╣');
     console.log(
-      `║  Passed: ${passed}   Failed: ${total - passed}                        ║`
+      `║  Total: ${String(total).padEnd(4)}  Passed: ${String(passed).padEnd(4)}  Failed: ${String(total - passed).padEnd(4)}       ║`
     );
     console.log(
-      `║  Pass Rate: ${total > 0 ? ((passed / total) * 100).toFixed(0) : 0}%                              ║`
+      `║  Overall Pass Rate: ${passRate}%${' '.repeat(Math.max(0, 27 - passRate.length))}║`
     );
-    console.log('╚══════════════════════════════════════════════╝');
+    console.log('╠══════════════════════════════════════════════════╣');
+    console.log('║  Category Breakdown:                             ║');
+
+    // Group by category
+    const categories = new Map<string, { total: number; passed: number }>();
+
+    for (const result of evalResults) {
+      const cat = categories.get(result.category) ?? {
+        total: 0,
+        passed: 0
+      };
+      cat.total++;
+
+      if (result.passed) {
+        cat.passed++;
+      }
+
+      categories.set(result.category, cat);
+    }
+
+    for (const [category, stats] of categories) {
+      const catRate =
+        stats.total > 0 ? ((stats.passed / stats.total) * 100).toFixed(1) : '0';
+      const line = `    ${category}: ${stats.passed}/${stats.total} (${catRate}%)`;
+
+      console.log(`║  ${line.padEnd(47)}║`);
+    }
+
+    console.log('╚══════════════════════════════════════════════════╝');
 
     for (const result of evalResults) {
       const status = result.passed ? 'PASS' : 'FAIL';
@@ -347,10 +401,28 @@ describeIfApiKey('Agent Evaluation Suite', () => {
       }
     }
 
-    console.log('');
+    // Structured JSON output for CI capture and regression tracking (FR35)
+    const resultsPayload = {
+      runAt: new Date().toISOString(),
+      totalCases: total,
+      passed,
+      failed: total - passed,
+      passRate,
+      byCategory: Object.fromEntries(categories),
+      details: evalResults.map((r) => ({
+        id: r.id,
+        category: r.category,
+        passed: r.passed,
+        latencyMs: r.latencyMs
+      }))
+    };
+
+    console.log('\n--- EVAL_RESULTS_JSON ---');
+    console.log(JSON.stringify(resultsPayload, null, 2));
+    console.log('--- END_EVAL_RESULTS_JSON ---\n');
   });
 
-  const cases = (testData as any).testCases as EvalTestCase[];
+  const cases = loadAllEvalCases();
 
   for (const tc of cases) {
     it(
@@ -516,16 +588,32 @@ describe('Eval Harness Utilities', () => {
     ).toBe(false);
   });
 
-  it('should load test cases from JSON', () => {
-    const cases = (testData as any).testCases;
-    expect(cases.length).toBeGreaterThanOrEqual(5);
+  it('should load 50+ test cases from all eval data files', () => {
+    const allCases = loadAllEvalCases();
+    expect(allCases.length).toBeGreaterThanOrEqual(50);
 
-    for (const tc of cases) {
+    for (const tc of allCases) {
       expect(tc.id).toBeDefined();
       expect(tc.input).toBeDefined();
       expect(tc.expectedToolCalls).toBeDefined();
       expect(tc.expectedOutputPatterns).toBeDefined();
       expect(tc.passCriteria).toBeDefined();
     }
+  });
+
+  it('should have no duplicate IDs across all eval data files', () => {
+    const allCases = loadAllEvalCases();
+    const ids = allCases.map((c) => c.id);
+    const uniqueIds = new Set(ids);
+    expect(ids.length).toBe(uniqueIds.size);
+  });
+
+  it('should cover all required categories', () => {
+    const allCases = loadAllEvalCases();
+    const categories = new Set(allCases.map((c) => c.category));
+    expect(categories.has('happy_path')).toBe(true);
+    expect(categories.has('edge_case')).toBe(true);
+    expect(categories.has('adversarial')).toBe(true);
+    expect(categories.has('multi_step')).toBe(true);
   });
 });

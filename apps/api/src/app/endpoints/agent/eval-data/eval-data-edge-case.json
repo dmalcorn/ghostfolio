@@ -1,0 +1,265 @@
+{
+  "description": "Edge case eval test cases — boundary conditions, missing data, invalid inputs, and ambiguous queries (FR27).",
+  "version": "1.0.0",
+  "testCases": [
+    {
+      "id": "ec-001",
+      "category": "edge_case",
+      "description": "Unknown ticker returns graceful error",
+      "input": "What is the price of ZZZZNOTREAL?",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": [
+        "not found",
+        "unable",
+        "could not",
+        "unavailable",
+        "no data",
+        "not available",
+        "couldn't find",
+        "does not exist",
+        "no results",
+        "invalid"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["$999", "market cap"],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-002",
+      "category": "edge_case",
+      "description": "Symbol not in mock data (AAPL) returns graceful error",
+      "input": "Show me the current price of AAPL",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": [
+        "not found",
+        "unable",
+        "could not",
+        "unavailable",
+        "no data",
+        "not available",
+        "couldn't find",
+        "does not exist",
+        "no results",
+        "AAPL",
+        "apple"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["$150", "$200", "market cap"],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-003",
+      "category": "edge_case",
+      "description": "Very short ambiguous input",
+      "input": "portfolio",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "AMZN", "portfolio", "holding"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-004",
+      "category": "edge_case",
+      "description": "Special characters in input are handled safely",
+      "input": "What's the price of !!!@@@###???",
+      "expectedToolCalls": [],
+      "expectedOutputPatterns": [
+        "not found",
+        "unable",
+        "could not",
+        "help",
+        "valid",
+        "understand",
+        "clarify",
+        "symbol",
+        "ticker"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["error", "exception", "stack trace", "TypeError"],
+      "passCriteria": {
+        "toolSelectionMatch": false,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-005",
+      "category": "edge_case",
+      "description": "Incomplete query handled gracefully",
+      "input": "Tell me about",
+      "expectedToolCalls": [],
+      "expectedOutputPatterns": [
+        "more",
+        "clarify",
+        "specific",
+        "what would you like",
+        "help",
+        "could you",
+        "please"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["error", "exception", "stack trace"],
+      "passCriteria": {
+        "toolSelectionMatch": false,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-006",
+      "category": "edge_case",
+      "description": "Benchmark comparison for non-configured benchmark",
+      "input": "Compare my portfolio to the NASDAQ",
+      "expectedToolCalls": ["benchmark_compare"],
+      "expectedOutputPatterns": [
+        "not available",
+        "not configured",
+        "available benchmark",
+        "SPY",
+        "S&P",
+        "not found",
+        "choose",
+        "select",
+        "available"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["NASDAQ performance: 15%"],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-007",
+      "category": "edge_case",
+      "description": "Mixed valid and invalid symbols",
+      "input": "Get me the price of VT and FAKESYMBOL",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["VT"],
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-008",
+      "category": "edge_case",
+      "description": "Query about asset class not in portfolio",
+      "input": "How much cryptocurrency do I hold?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": [
+        "no crypto",
+        "don't have",
+        "do not have",
+        "not hold",
+        "no cryptocurrency",
+        "portfolio",
+        "VT",
+        "AMZN"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["BTC", "bitcoin holdings: $5000"],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-009",
+      "category": "edge_case",
+      "description": "Repeated question phrased differently",
+      "input": "I want to know the value of Vanguard Total World Stock ETF",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["VT", "108", "Vanguard", "price", "$"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-010",
+      "category": "edge_case",
+      "description": "Numeric-only input handled gracefully",
+      "input": "12345",
+      "expectedToolCalls": [],
+      "expectedOutputPatterns": [
+        "help",
+        "clarify",
+        "understand",
+        "question",
+        "portfolio",
+        "financial",
+        "what would you like"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": ["error", "exception", "stack trace"],
+      "passCriteria": {
+        "toolSelectionMatch": false,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-011",
+      "category": "edge_case",
+      "description": "Lowercase ticker symbol still works",
+      "input": "What's the price of vt?",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["VT", "108", "price", "$"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "ec-012",
+      "category": "edge_case",
+      "description": "Question about portfolio with date range hint",
+      "input": "How has my portfolio done this year?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["portfolio", "performance", "return", "%"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    }
+  ]
+}

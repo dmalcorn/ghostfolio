@@ -1,0 +1,412 @@
+{
+  "description": "Happy path eval test cases — varied portfolio, market, and benchmark queries that validate correct tool selection (FR25) and output patterns (FR24).",
+  "version": "1.0.0",
+  "testCases": [
+    {
+      "id": "hp-001",
+      "category": "happy_path",
+      "description": "Asks about portfolio holdings explicitly",
+      "input": "What are my current holdings?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "AMZN"],
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-002",
+      "category": "happy_path",
+      "description": "Asks about portfolio allocation percentages",
+      "input": "Show me my portfolio allocation breakdown",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "85", "15"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-003",
+      "category": "happy_path",
+      "description": "Asks about overall portfolio performance",
+      "input": "How is my portfolio performing overall?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": [
+        "performance",
+        "return",
+        "gain",
+        "profit",
+        "%"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-004",
+      "category": "happy_path",
+      "description": "Asks about net worth",
+      "input": "What is my total net worth?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["6882", "6,882", "net worth", "total"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-005",
+      "category": "happy_path",
+      "description": "Asks how much was invested",
+      "input": "How much money have I invested in total?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["5732", "5,732", "invest"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-006",
+      "category": "happy_path",
+      "description": "Asks about best performing holding",
+      "input": "Which of my holdings has the best return?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "12", "%"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-007",
+      "category": "happy_path",
+      "description": "Asks about total gains",
+      "input": "How much profit have I made on my investments?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["650", "gain", "profit", "performance"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-008",
+      "category": "happy_path",
+      "description": "Asks about accounts",
+      "input": "What investment accounts do I have?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["brokerage", "account"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-009",
+      "category": "happy_path",
+      "description": "Asks for current price of VT by ticker",
+      "input": "What is the current price of VT?",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["VT", "108"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-010",
+      "category": "happy_path",
+      "description": "Asks for AMZN price by company name",
+      "input": "What is Amazon stock trading at right now?",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["AMZN", "191", "amazon"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-011",
+      "category": "happy_path",
+      "description": "Asks for SPY price",
+      "input": "What's SPY trading at?",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["SPY", "598"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-012",
+      "category": "happy_path",
+      "description": "Asks for prices of multiple symbols",
+      "input": "Show me the current prices for VT and AMZN",
+      "expectedToolCalls": ["market_data"],
+      "expectedOutputPatterns": ["VT", "AMZN"],
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-013",
+      "category": "happy_path",
+      "description": "Asks what benchmarks are available",
+      "input": "What benchmarks can I compare my portfolio against?",
+      "expectedToolCalls": ["benchmark_compare"],
+      "expectedOutputPatterns": ["SPY", "S&P", "benchmark"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-014",
+      "category": "happy_path",
+      "description": "Compares portfolio to S&P 500",
+      "input": "How does my portfolio compare to the S&P 500?",
+      "expectedToolCalls": ["benchmark_compare"],
+      "expectedOutputPatterns": [
+        "SPY",
+        "S&P",
+        "portfolio",
+        "compare",
+        "performance",
+        "benchmark"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-015",
+      "category": "happy_path",
+      "description": "Asks about ETF holdings",
+      "input": "Do I own any ETFs?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "ETF"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-016",
+      "category": "happy_path",
+      "description": "Asks about individual stock holdings",
+      "input": "Do I have any individual stocks in my portfolio?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["AMZN", "stock"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-017",
+      "category": "happy_path",
+      "description": "Asks about VT allocation percentage",
+      "input": "What percentage of my portfolio is in VT?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["VT", "85", "%"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-018",
+      "category": "happy_path",
+      "description": "Asks about market trend via benchmarks",
+      "input": "What is the current market trend?",
+      "expectedToolCalls": ["benchmark_compare"],
+      "expectedOutputPatterns": ["trend", "market", "up", "bull", "neutral"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-019",
+      "category": "happy_path",
+      "description": "Portfolio summary using informal language",
+      "input": "Give me a quick summary of how my investments are doing",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": [
+        "portfolio",
+        "VT",
+        "performance",
+        "return",
+        "investment"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-020",
+      "category": "happy_path",
+      "description": "Asks about portfolio value in dollar terms",
+      "input": "How much is my portfolio worth in dollars?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": ["USD", "$", "6882", "6,882", "worth", "value"],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-021",
+      "category": "happy_path",
+      "description": "Asks about AMZN performance in portfolio",
+      "input": "How has Amazon performed in my portfolio?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": [
+        "AMZN",
+        "amazon",
+        "8",
+        "%",
+        "performance",
+        "return"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-022",
+      "category": "happy_path",
+      "description": "Asks about benchmark all-time high distance",
+      "input": "How far is the S&P 500 from its all-time high?",
+      "expectedToolCalls": ["benchmark_compare"],
+      "expectedOutputPatterns": [
+        "SPY",
+        "S&P",
+        "all-time",
+        "high",
+        "3",
+        "%",
+        "benchmark"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": false,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    },
+    {
+      "id": "hp-023",
+      "category": "happy_path",
+      "description": "Asks about diversification",
+      "input": "Am I well diversified across my investments?",
+      "expectedToolCalls": ["portfolio_analysis"],
+      "expectedOutputPatterns": [
+        "VT",
+        "AMZN",
+        "allocat",
+        "diversi",
+        "portfolio"
+      ],
+      "expectedOutputPatternsMode": "any",
+      "unexpectedPatterns": [],
+      "passCriteria": {
+        "toolSelectionMatch": true,
+        "outputPatternsPresent": true,
+        "noUnexpectedPatterns": true
+      },
+      "timeoutMs": 30000
+    }
+  ]
+}
