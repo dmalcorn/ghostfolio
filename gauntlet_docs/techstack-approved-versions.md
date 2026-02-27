@@ -65,13 +65,13 @@ _Quick reference for AI agents and developers. Do NOT upgrade any dependency wit
 
 | Package                | Version | Notes                              |
 | ---------------------- | ------- | ---------------------------------- |
-| `langchain`            | ^1.2.26 | Core agent framework               |
-| `@langchain/core`      | ^1.1.27 | Base abstractions                  |
-| `@langchain/openai`    | ^1.2.9  | ChatOpenAI (OpenRouter-compatible) |
-| `@langchain/community` | ^1.1.18 | Redis memory, integrations         |
-| `langsmith`            | ^0.5.6  | Tracing/observability              |
+| `langchain`            | 1.2.28  | Core agent framework               |
+| `@langchain/core`      | 1.1.29  | Base abstractions                  |
+| `@langchain/openai`    | 1.2.11  | ChatOpenAI (OpenRouter-compatible) |
+| `@langchain/community` | 1.1.18  | Redis memory, integrations         |
+| `langsmith`            | 0.5.7   | Tracing/observability              |
 
-> These use `^` (caret) ranges since they are new additions. Pin to exact versions after MVP stabilization if needed.
+> Pinned to exact versions after Railway deploy failure caused by `@langchain/openai` / `@langchain/core` version mismatch (2026-02-27).
 
 ## Auth & Security
 
