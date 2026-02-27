@@ -6,6 +6,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
     command: sleep infinity
     ports:
       - "4200:4200"
@@ -54,3 +55,4 @@ services:
 
 volumes:
   postgres-data:
+  node_modules:

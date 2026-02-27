@@ -19,6 +19,6 @@
       }
     }
   },
-  "postCreateCommand": "rm -rf node_modules && npm install",
+  "postCreateCommand": "sudo chown -R node:node /workspace/node_modules 2>/dev/null; npm install",
   "remoteUser": "node"
 }
