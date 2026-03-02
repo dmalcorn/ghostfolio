@@ -237,7 +237,7 @@ Evaluators receive a complete submission package: cost analysis, architecture do
 **Deadline:** Final (Sunday) 10:59 PM CT
 **Agent Teams:** YES — Teammate 1: cost analysis, Teammate 2: architecture doc, Teammate 3: OSS + social post, Lead: demo coordination + packaging
 **FRs covered:** Project requirements (non-FR deliverables)
-**Progress:** Stories 8.1 (cost analysis), 8.2 (architecture summary), 8.4 (demo script) complete. Story 8.3 (OSS contribution) pending Diane's decision. Demo recording + social post pending Diane.
+**Progress:** Stories 8.1 (cost analysis), 8.2 (architecture summary), 8.3 (OSS contribution — `langchain-agent-toolkit` published to npm), 8.4 (demo script) complete. Demo recording + social post pending Diane.
 
 ---
 
@@ -1018,6 +1018,7 @@ So that others can benefit from and build upon this work.
 **Then** it is licensed AGPLv3 consistent with Ghostfolio
 
 **Agent Teams:** Teammate 3.
+**Completed:** 2026-02-27 — Published [`langchain-agent-toolkit`](https://www.npmjs.com/package/langchain-agent-toolkit) v0.1.0 to npm. Standalone package extracting verification (confidence scoring, data freshness, numerical crosscheck, ticker validation) and observability (error categorization, token tracking, trace sanitization) layers. 58 unit tests, AGPL-3.0 licensed. Source: `packages/langchain-agent-toolkit/`.
 
 ---
 

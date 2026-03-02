@@ -111,4 +111,13 @@ All agent requests are traced via **LangSmith** (project: `ghostfolio-agent`) wi
 
 ## Open Source Contribution
 
-_Selection pending — see `gauntlet_docs/epic-8-implementation-plan.md` for options under consideration._
+**Published npm package:** [`langchain-agent-toolkit`](https://www.npmjs.com/package/langchain-agent-toolkit) (v0.1.0)
+
+The verification and observability layers were extracted into a standalone, framework-agnostic npm package that any LangChain tool-calling agent can use. The package includes:
+
+- **Verification:** Confidence scoring, data freshness validation, numerical consistency checks, ticker symbol hallucination detection
+- **Observability:** Error categorization, token usage tracking, trace sanitization (PII redaction)
+
+All functions are pure TypeScript with configurable options — no dependency on NestJS, Ghostfolio, or any specific LLM provider. 58 unit tests, AGPL-3.0 licensed.
+
+Source: `packages/langchain-agent-toolkit/` in this repository.

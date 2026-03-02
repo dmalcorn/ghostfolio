@@ -1,0 +1,45 @@
+{
+  "name": "langchain-agent-toolkit",
+  "version": "0.1.0",
+  "description": "Verification, observability, and quality scoring utilities for LangChain tool-calling agents. Includes confidence scoring, data freshness validation, numerical consistency checks, ticker symbol hallucination detection, error categorization, token tracking, and trace sanitization.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "langchain",
+    "llm",
+    "agent",
+    "verification",
+    "observability",
+    "hallucination-detection",
+    "confidence-scoring",
+    "token-tracking",
+    "ai-agent",
+    "tool-calling"
+  ],
+  "author": "Diane (AgentForge / Gauntlet AI)",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ghostfolio/ghostfolio",
+    "directory": "packages/langchain-agent-toolkit"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.3.0",
+    "typescript": "^5.4.0"
+  }
+}

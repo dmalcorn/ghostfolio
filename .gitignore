@@ -6,6 +6,7 @@
 
 # dependencies
 /node_modules
+packages/**/node_modules
 npm-debug.log
 
 # IDEs and editors
