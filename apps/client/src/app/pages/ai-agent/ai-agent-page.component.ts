@@ -29,7 +29,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { refreshOutline, sendOutline } from 'ionicons/icons';
+import {
+  refreshOutline,
+  sendOutline,
+  thumbsUpOutline,
+  thumbsDownOutline
+} from 'ionicons/icons';
 import { MarkdownModule } from 'ngx-markdown';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -37,6 +42,7 @@ import { takeUntil } from 'rxjs/operators';
 interface ChatMessage {
   content: string;
   error?: boolean;
+  feedback?: 'up' | 'down';
   metadata?: AgentChatMetadata;
   role: 'user' | 'agent';
   timestamp: Date;
@@ -91,7 +97,12 @@ export class GfAiAgentPageComponent
     private dataService: DataService,
     private userService: UserService
   ) {
-    addIcons({ refreshOutline, sendOutline });
+    addIcons({
+      refreshOutline,
+      sendOutline,
+      thumbsUpOutline,
+      thumbsDownOutline
+    });
   }
 
   public ngOnInit() {
@@ -212,6 +223,37 @@ export class GfAiAgentPageComponent
           this.changeDetectorRef.markForCheck();
         }
       });
+  }
+
+  public onFeedback(messageIndex: number, rating: 'up' | 'down') {
+    const agentMessages = this.messages.filter((m) => m.role === 'agent');
+    const message = agentMessages[messageIndex];
+
+    if (!message || !this.conversationId) {
+      return;
+    }
+
+    const newRating = message.feedback === rating ? undefined : rating;
+
+    message.feedback = newRating;
+    this.changeDetectorRef.markForCheck();
+
+    if (newRating) {
+      this.dataService
+        .submitAgentFeedback({
+          conversationId: this.conversationId,
+          messageIndex,
+          rating: newRating
+        })
+        .pipe(takeUntil(this.unsubscribeSubject))
+        .subscribe();
+    }
+  }
+
+  public getAgentMessageIndex(message: ChatMessage): number {
+    const agentMessages = this.messages.filter((m) => m.role === 'agent');
+
+    return agentMessages.indexOf(message);
   }
 
   public ngOnDestroy() {

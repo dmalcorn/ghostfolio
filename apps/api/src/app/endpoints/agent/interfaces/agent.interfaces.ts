@@ -47,3 +47,9 @@ export interface ChatRequestDto {
   message: string;
   conversationId?: string;
 }
+
+export interface FeedbackRequestDto {
+  conversationId: string;
+  messageIndex: number;
+  rating: 'up' | 'down';
+}

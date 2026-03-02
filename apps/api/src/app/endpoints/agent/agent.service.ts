@@ -488,6 +488,34 @@ export class AgentService {
     }
   }
 
+  public async submitFeedback(
+    conversationId: string,
+    messageIndex: number,
+    rating: string,
+    userId: string
+  ): Promise<void> {
+    await this.prismaService.agentFeedback.upsert({
+      where: {
+        conversationId_messageIndex_userId: {
+          conversationId,
+          messageIndex,
+          userId
+        }
+      },
+      update: { rating },
+      create: {
+        conversationId,
+        messageIndex,
+        rating,
+        userId
+      }
+    });
+
+    this.logger.log(
+      `Feedback recorded: ${rating} for conversation ${conversationId} message ${messageIndex}`
+    );
+  }
+
   private safeParseJson(text: string): object {
     try {
       return JSON.parse(text);

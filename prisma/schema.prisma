@@ -247,6 +247,20 @@ model Subscription {
   @@index([userId])
 }
 
+model AgentFeedback {
+  id             String   @id @default(uuid())
+  conversationId String
+  messageIndex   Int
+  rating         String
+  createdAt      DateTime @default(now())
+  userId         String
+  user           User     @relation(fields: [userId], onDelete: Cascade, references: [id])
+
+  @@unique([conversationId, messageIndex, userId])
+  @@index([userId])
+  @@index([conversationId])
+}
+
 model Tag {
   activities Order[]
   id         String  @id @default(uuid())
@@ -264,6 +278,7 @@ model User {
   accessToken   String?
   accounts      Account[]
   activities    Order[]
+  agentFeedback AgentFeedback[]
   analytics     Analytics?
   apiKeys       ApiKey[]
   authChallenge String?

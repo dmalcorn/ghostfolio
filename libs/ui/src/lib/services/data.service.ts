@@ -186,6 +186,22 @@ export class DataService {
     });
   }
 
+  public submitAgentFeedback({
+    conversationId,
+    messageIndex,
+    rating
+  }: {
+    conversationId: string;
+    messageIndex: number;
+    rating: 'up' | 'down';
+  }) {
+    return this.http.post<{ success: boolean }>('/api/v1/agent/feedback', {
+      conversationId,
+      messageIndex,
+      rating
+    });
+  }
+
   public createStripeCheckoutSession({
     couponId,
     priceId

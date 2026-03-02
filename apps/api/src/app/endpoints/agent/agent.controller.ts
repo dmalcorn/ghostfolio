@@ -19,7 +19,11 @@ import { REQUEST } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AgentService, LlmUnavailableError } from './agent.service';
-import { AgentResponse, ChatRequestDto } from './interfaces/agent.interfaces';
+import {
+  AgentResponse,
+  ChatRequestDto,
+  FeedbackRequestDto
+} from './interfaces/agent.interfaces';
 
 const MAX_MESSAGE_LENGTH = 10240; // 10KB
 
@@ -72,6 +76,43 @@ export class AgentController {
       throw new InternalServerErrorException(
         'An unexpected error occurred. Please try again.'
       );
+    }
+  }
+
+  @Post('feedback')
+  @HasPermission(permissions.accessAgentChat)
+  @HttpCode(200)
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async feedback(
+    @Body() body: FeedbackRequestDto
+  ): Promise<{ success: boolean }> {
+    if (!body.conversationId || typeof body.conversationId !== 'string') {
+      throw new BadRequestException('conversationId is required');
+    }
+
+    if (typeof body.messageIndex !== 'number' || body.messageIndex < 0) {
+      throw new BadRequestException(
+        'messageIndex must be a non-negative number'
+      );
+    }
+
+    if (body.rating !== 'up' && body.rating !== 'down') {
+      throw new BadRequestException('rating must be "up" or "down"');
+    }
+
+    try {
+      await this.agentService.submitFeedback(
+        body.conversationId,
+        body.messageIndex,
+        body.rating,
+        this.request.user.id
+      );
+
+      return { success: true };
+    } catch (error) {
+      this.logger.error('Failed to submit feedback', error);
+
+      throw new InternalServerErrorException('Failed to submit feedback');
     }
   }
 
