@@ -481,9 +481,9 @@ describeIfApiKey('Agent Evaluation Suite', () => {
         );
 
         const passed =
-          toolSelectionPassed &&
-          outputPatternsPassed &&
-          unexpectedPatternsPassed;
+          (!tc.passCriteria.toolSelectionMatch || toolSelectionPassed) &&
+          (!tc.passCriteria.outputPatternsPresent || outputPatternsPassed) &&
+          (!tc.passCriteria.noUnexpectedPatterns || unexpectedPatternsPassed);
 
         const details: string[] = [];
 
